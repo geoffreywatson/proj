@@ -1,0 +1,58 @@
+@(message: String)(implicit messages: Messages)
+
+@main(Messages("application.register")) {
+
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <h1>@Messages("application.name")</h1>
+        </div>
+        <br>
+        <div class="container-fluid">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="regEmail" class="col-md-2 control-label">Email</label>
+                    <div class="col-md-4">
+                        <input type="email" class="form-control" id="regEmail" placeholder="Email">
+                        <span aria-hidden="true"></span>
+                    </div>
+                    <span id='feedbackEmail'></span>
+                </div>
+                <div class="form-group">
+                    <label for="pswd" class="col-md-2 control-label">Password</label>
+                    <div class="col-md-4">
+                        <input type="password" class="form-control" id="pswd" placeholder="Password">
+                        <span aria-hidden="true"></span>
+                    </div>
+                    <span id="feedbackPswd"></span>
+                </div>
+                <div class="form-group">
+                    <label for="chckPswd" class="col-md-2 control-label">Re-enter password</label>
+                    <div class="col-md-4">
+                        <input type="password" class="form-control" id="chckPswd" placeholder="Re-enter password">
+                        <span aria-hidden="true"></span>
+                    </div>
+                    <span id="feedbackPswdChk"></span>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox">Remember me
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <button class="btn btn-success">@Messages("application.register")</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+}
+
+
+

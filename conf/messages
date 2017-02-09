@@ -1,1 +1,3 @@
-application.name= Loanman
+application.name=Loanman
+application.signin=Sign in
+application.register=register
