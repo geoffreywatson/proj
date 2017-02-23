@@ -1,0 +1,20 @@
+@(elements:helper.FieldElements)
+
+<div class="@if(elements.hasErrors){error}">
+    <div class="form-group">
+        <label for="@elements.id" class="col-md-2 control-label">@elements.label</label>
+        <div class="col-md-4">
+            <input
+            type="@elements.args.get('type).getOrElse("text")"
+            class="form-control"
+            id="@elements.id"
+            name="@elements.name"
+            value="@elements.field.value"
+            placeholder="@elements.args.get('placeholder).getOrElse("")">
+            <span class="help">@elements.infos.mkString(", ")</span>
+        </div>
+        <span id="feedback" class="@if(elements.hasErrors) {alert alert-danger}">
+            @elements.errors.mkString(", ")
+        </span>
+    </div>
+</div>

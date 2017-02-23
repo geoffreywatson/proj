@@ -1,0 +1,36 @@
+@(loginForm:Form[LoginUser])(implicit messages:Messages, flash:Flash)
+@import helper._
+@import views.fieldConstructors.BSHelpers._
+@import play.api.i18n._
+
+@main(Messages("application.login")){
+
+    <div class="container-fluid">
+
+
+        @form(action=routes.Application.loginUser(), 'class->"form-horizontal"){
+            @inputText(loginForm("email"), args= '_label ->"Email", 'placeholder -> "Email", 'type->"email",
+            '_showConstraints->false, '_id->"loginEmail", 'id->"loginEmail")
+            @inputPassword(loginForm("password"), args= '_label -> "Password", 'type->"password",
+            '_showConstraints->false, '_id->"loginPswd", 'placeholder->"Password", 'id->"loginPswd")
+            <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox">Remember me
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-info">@Messages("application.signin")</button>
+                </div>
+            </div>
+        }
+
+    </div>
+
+
+
+}

@@ -3,9 +3,20 @@
 # ~~~~
 
 
-GET     /                           controllers.HomeController.index
+GET     /                           controllers.Application.index
 
-GET     /register                    controllers.HomeController.register
+GET     /login                      controllers.Application.login
+
+GET     /register                   controllers.Application.register
+
+GET     /contact                    controllers.AppForm.contactInfo
+
+
+POST    /userdata                   controllers.Application.insertUser
+
+POST    /login                      controllers.Application.loginUser
+
+POST    /contactdata                controllers.AppForm.insertContact
 
 
 # An example controller showing how to use dependency injection

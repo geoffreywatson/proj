@@ -1,58 +1,42 @@
-@(message: String)(implicit messages: Messages)
+
+@(userForm:Form[UserFormData])(implicit messages: Messages, flash: Flash)
+
+@import play.api.i18n._
+@import helper._
+@import views.fieldConstructors.BSHelpers._
 
 @main(Messages("application.register")) {
 
-    <div class="container-fluid">
-        <div class="jumbotron">
-            <h1>@Messages("application.name")</h1>
-        </div>
-        <br>
         <div class="container-fluid">
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label for="regEmail" class="col-md-2 control-label">Email</label>
-                    <div class="col-md-4">
-                        <input type="email" class="form-control" id="regEmail" placeholder="Email">
-                        <span aria-hidden="true"></span>
-                    </div>
-                    <span id='feedbackEmail'></span>
-                </div>
-                <div class="form-group">
-                    <label for="pswd" class="col-md-2 control-label">Password</label>
-                    <div class="col-md-4">
-                        <input type="password" class="form-control" id="pswd" placeholder="Password">
-                        <span aria-hidden="true"></span>
-                    </div>
-                    <span id="feedbackPswd"></span>
-                </div>
-                <div class="form-group">
-                    <label for="chckPswd" class="col-md-2 control-label">Re-enter password</label>
-                    <div class="col-md-4">
-                        <input type="password" class="form-control" id="chckPswd" placeholder="Re-enter password">
-                        <span aria-hidden="true"></span>
-                    </div>
-                    <span id="feedbackPswdChk"></span>
-                </div>
+
+            @if(userForm.hasGlobalErrors){
+                <ul>
+                    @userForm.globalErrors.map{error =>
+                      <li>@error.message</li>
+                    }
+                </ul>
+            }
+
+
+            @helper.form(action= routes.Application.insertUser(), 'class -> "form-horizontal"){
+                @inputText(userForm("email"), args = '_id->"email", 'type->"email",'_label->"Email",
+                    '_showConstraints->false, '_showErrors->true, 'placeholder->"Email")(textInputGroup,implicitly)
+                @inputPassword(userForm("password"), args = '_id->"password", 'type->"password",
+                    '_label->"Password", '_showConstraints->false, '_showErrors->true, 'placeholder->"Password")(textInputGroup,implicitly)
+                @inputPassword(userForm("confirmPswd"), args= '_id->"confirmPswd", 'type->"password",
+                    '_label->"Re-enter password", '_showConstraints->false, '_showErrors->true,
+                    'placeholder->"Re-enter password")
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox">Remember me
-                            </label>
-                        </div>
+                        <button type="submit" class="btn btn-success">@Messages("application.register")</button>
                     </div>
                 </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <button class="btn btn-success">@Messages("application.register")</button>
-                    </div>
-                </div>
-            </form>
+            }
         </div>
 
-    </div>
 
 }
+
 
 
 

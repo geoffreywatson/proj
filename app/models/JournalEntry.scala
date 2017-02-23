@@ -38,11 +38,11 @@ case class Account(id:Int,name:String,group:AccountGroup){
 case class JournalLine(je:Int,account:Account,txn:LedgerSide,memo:Option[String])
 
 
-// A valid journal entry has sum of DEBITS equal to sum of CREDITS
+// A journal entry is made up of JournalLines
 
 case class JournalEntry(id:Int,date:LocalDate,jeLines:List[JournalLine]) {
 
-  // validate the journal entry: sum of CREDIT == sum of DEBIT
+  // validate the journal entry: the sum of the CREDIT's must equal the sum of the DEBIT's
 
   def validateJE(jeLines: List[JournalLine]): Boolean = {
     def validJE(lines: List[JournalLine], sum: BigDecimal): Boolean = lines match {

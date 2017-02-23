@@ -1,4 +1,5 @@
 import org.scalatestplus.play._
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.test._
 import play.api.test.Helpers._
 
@@ -7,7 +8,7 @@ import play.api.test.Helpers._
  * You can mock out a whole application including requests, plugins etc.
  * For more information, consult the wiki.
  */
-class ApplicationSpec extends PlaySpec with OneAppPerTest {
+class ApplicationSpec (val messagesApi: MessagesApi) extends PlaySpec with OneAppPerTest with I18nSupport{
 
   "Routes" should {
 
@@ -24,7 +25,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Your new application is ready.")
+      contentAsString(home) must include (Messages("application.name"))
     }
 
   }

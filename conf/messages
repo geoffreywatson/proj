@@ -1,3 +1,6 @@
-application.name=Loanman
+application.name=application.name
 application.signin=Sign in
 application.register=register
+application.login=login
+appform.next=Next
+appform.intro=The process will take about 10 minutes to complete

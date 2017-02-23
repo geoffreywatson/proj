@@ -2,7 +2,7 @@
  * This template takes a single argument, a String containing a
  * message to display.
  *@
-@(message: String)(implicit messages: Messages)
+@(message: String)(implicit messages: Messages, flash: Flash)
 
 @*
  * Call the `main` template with two arguments. The first
@@ -17,46 +17,8 @@
      *@
 
     <div class="container-fluid">
-        <div class="jumbotron">
-            <h1>@Messages("application.name")</h1>
-        </div>
-        <br>
-        <div class="container-fluid">
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label for="indexEmail" class="col-md-2 control-label">Email</label>
-                    <div class="col-md-4" id="inputEmail">
-                        <input type="email" class="form-control" id="indexEmail" placeholder="Email">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="indexPswd" class="col-md-2 control-label">Password</label>
-                    <div class="col-md-4">
-                        <input type="password" class="form-control" id="indexPswd" placeholder="Password">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-2">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox">Remember me
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="checkbox">
-                            <label>not registered? <a href="@routes.HomeController.register">
-                            @Messages("application.register")</a></label>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <button class="btn btn-info">@Messages("application.signin")</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+
+        <h2>@message</h2>
 
     </div>
 
