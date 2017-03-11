@@ -9,14 +9,23 @@ GET     /login                      controllers.Application.login
 
 GET     /register                   controllers.Application.register
 
+GET     /applications               controllers.AppForm.admin
+
 GET     /contact                    controllers.AppForm.contactInfo
 
+GET     /useraddress                controllers.AppForm.userAddress
+
+GET     /javascriptRoutes           controllers.Application.javascriptRoutes
+
+GET     /userexists/:email          controllers.Application.userExists(email:String)
+
+POST    /useraddress                controllers.AppForm.insertUserAddress
 
 POST    /userdata                   controllers.Application.insertUser
 
 POST    /login                      controllers.Application.loginUser
 
-POST    /contactdata                controllers.AppForm.insertContact
+POST    /userdetails                controllers.AppForm.insertUserDetails
 
 
 # An example controller showing how to use dependency injection

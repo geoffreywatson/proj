@@ -27,14 +27,14 @@ class ContactTable(tag:Tag) extends Table[Contact](tag,"CONTACT") {
   def created = column[java.sql.Timestamp]("CREATED")
 
   val users = TableQuery[UserTable]
-  def userFK = foreignKey("userFK",uid,users)(_.id)
+
 
   def * = (id,uid,title,firstName,middleName,lastName,dob,nin,created) <> (Contact.tupled, Contact.unapply)
 }
 
 
 
-class ContactDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
+class ContactDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO: UserDAO) extends HasDatabaseConfigProvider[JdbcProfile] {
 
   val contacts = TableQuery[ContactTable]
 

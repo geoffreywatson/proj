@@ -10,7 +10,7 @@ import services.UserDAO
 class UserSpec @Inject()(userDao:UserDAO) extends PlaySpec {
 
 
-  "a user form" must {
+  "a usertemplate form" must {
     "throw exception " in {
       a [Exception] must be thrownBy {
         val form = new UserForms(userDao).userForm

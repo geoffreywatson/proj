@@ -1,0 +1,7 @@
+@(message:String)(implicit messages: Messages, flash:Flash)
+
+@user.usertemplate(message){
+    <h2>Welcome please begin an application for finance</h2>
+
+    <button type="button" class="btn btn-info"><a href="@routes.AppForm.contactInfo()">Begin !</a></button>
+}

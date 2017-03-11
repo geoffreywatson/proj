@@ -8,9 +8,10 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 
-case class Address(id:Long,line1:String, line2:String, line3:String,city:String,county:String,postcode:String,country:String)
+case class Address(id:Long,line1:String, line2:String, line3:String,city:String,county:String,postcode:String,
+                   created:java.sql.Timestamp)
 
-case class AddressData(line1:String,line2:String,line3:String,city:String,county:String,postcode:String,country:String)
+case class AddressData(line1:String,line2:String,line3:String,city:String,county:String,postcode:String)
 
 object AddressForms{
 
@@ -21,8 +22,7 @@ object AddressForms{
       "line3" -> text,
       "city" -> text,
       "county" -> text,
-      "postcode" -> nonEmptyText,
-      "country" -> text
+      "postcode" -> nonEmptyText
     )(AddressData.apply)(AddressData.unapply)
   )
 }

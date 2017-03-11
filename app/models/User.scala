@@ -12,36 +12,44 @@ import scala.util.matching.Regex
   * Created by geoffreywatson on 01/02/2017.
   */
 
-  case class User(id: Long, email: String, pswdHash: Int, var role: String = "user", created:java.sql.Timestamp)
+  case class User(email: String, pswdHash: Int, role: String, title:Option[String], firstName:Option[String],
+                  middleName:Option[String], lastName:Option[String], dob:Option[java.sql.Date], nin:Option[String],
+                  created:java.sql.Timestamp)
 
-  case class UserFormData(email: String, password: String, confirmPswd: String)
+  case class UserRegisterFormData(email: String, password: String, confirmPswd: String)
 
   case class LoginUser(email:String,password:String)
 
+  case class UserAddress(id:Long,email:String,aid:Long)
+
   class UserForms @Inject() (userDao: UserDAO) {
 
-    val userForm = Form(
+    val userRegForm = Form(
       mapping(
         "email" -> email,
-        "password" -> nonEmptyText.verifying(inValidPswd,pswd=>passwordIsValid(pswd)),
+        "password" -> nonEmptyText.verifying(inValidPswdMsg,pswd=>passwordIsValid(pswd)),
         "confirmPswd" -> nonEmptyText
-      )(UserFormData.apply)(UserFormData.unapply) verifying("failed constraints!", result =>
+      )(UserRegisterFormData.apply)(UserRegisterFormData.unapply) verifying("failed constraints!", result =>
       result match {
-        case UserFormData(email, password,confirmPswd) => check(email, password,confirmPswd)
+        case UserRegisterFormData(email, password,confirmPswd) => check(email, password,confirmPswd)
       })
     )
+
+    val inValidPswdMsg = "Password must: 8+ chars incl. [a-z] + [A-Z]."
+
 
     def passwordIsValid(pswd:String):Boolean={
       val uc = new Regex("[A-Z]")
       val lc = new Regex("[a-z]")
       uc.findFirstIn(pswd).isDefined && lc.findFirstIn(pswd).isDefined && pswd.length>7 && pswd.trim.length == pswd.length
     }
-    val inValidPswd = "Password must: 8+ chars incl. [a-z] + [A-Z]"
+
 
 
   def check(email:String,password:String,confirmPswd:String):Boolean ={
-    val re = new Regex("[A-Z]")
-    re.findFirstIn(password).isDefined && (password == confirmPswd) && password.length > 7 &&
+    val uc = new Regex("[A-Z]")
+    val lc = new Regex("[a-z]")
+    uc.findFirstIn(password).isDefined && lc.findFirstIn(password).isDefined && (password == confirmPswd) && password.length > 7 &&
       (!Await.result(userDao.userExists(email),scala.concurrent.duration.Duration(1,"seconds")))
   }
 

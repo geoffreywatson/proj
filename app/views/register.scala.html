@@ -1,11 +1,11 @@
 
-@(userForm:Form[UserFormData])(implicit messages: Messages, flash: Flash)
+@(userForm:Form[UserRegisterFormData])(implicit messages: Messages, flash: Flash)
 
 @import play.api.i18n._
 @import helper._
 @import views.fieldConstructors.BSHelpers._
 
-@main(Messages("application.register")) {
+@user.usertemplate(Messages("application.register")) {
 
         <div class="container-fluid">
 
@@ -32,6 +32,7 @@
                     </div>
                 </div>
             }
+
         </div>
 
 

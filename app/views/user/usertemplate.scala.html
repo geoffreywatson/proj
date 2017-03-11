@@ -1,0 +1,28 @@
+@(message:String)(content:Html)(implicit messages:Messages, flash:Flash)
+
+@main(message){
+
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <h2>@messages("application.name")</h2>
+        </div>
+    </div>
+
+    <div class="container">
+        @if(flash.get("success").isDefined){
+            <div class="alert alert-success">
+            @flash.get("success")
+            </div>
+        }
+        @if(flash.get("error").isDefined){
+            <div class="alert alert-danger">
+            @flash.get("error")
+            </div>
+        }
+    </div>
+
+    @content
+
+
+
+}

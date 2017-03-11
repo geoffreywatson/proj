@@ -1,0 +1,34 @@
+@(contactForm:Form[ContactFormData])(implicit messages: Messages, flash:Flash)
+@import helper._
+@import views.fieldConstructors.BSHelpers._
+@import play.api.i18n._
+
+
+
+@user.usertemplate("contact form"){
+
+    <div class="container-fluid">
+        @form(action=routes.AppForm.insertUserDetails(), 'class->"form-horizontal"){
+            @select(field = contactForm("title"),
+                options = Seq("mr"->"Mr","mrs"->"Mrs"), '_label->"Title", 'placeholder->"Title")
+            @inputText(contactForm("firstName"),
+                args= '_label -> "First Name", 'placeholder -> "First Name" )
+            @inputText(contactForm("middleName"),
+                args= '_label -> "Middle Name", 'placeholder ->"Middle Name")
+            @inputText(contactForm("lastName"),
+                args = '_label -> "Last Name", 'placeholder -> "Last Name",
+                '_showConstraints -> false)
+            @inputText(contactForm("dob"),
+                args = '_label -> "DOB", 'placeholder -> "DOB", '_showConstraints->false)
+            @inputText(contactForm("nin"),
+                args = '_label -> "National Ins No", 'placeholder -> "National Ins No", '_showConstraints->false)
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-info">@Messages("appform.next")</button>
+                </div>
+            </div>
+        }
+
+    </div>
+}
