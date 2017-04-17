@@ -1,0 +1,28 @@
+@(companyForm:Form[CompanyFormData])(implicit messages:Messages, flash:Flash)
+
+@import helper._
+@import views.fieldConstructors.BSHelpers._
+@import play.api.i18n._
+
+@user.usertemplate("company"){
+    <div class="container-fluid">
+        <h2>Your business...</h2>
+        <br>
+        @form(action=routes.AppForm.insertCompany(), 'class->"form-horizontal"){
+            @inputText(companyForm("name"), args='_label->"Company Name")
+            @inputText(companyForm("tradingDate"))
+            @inputText(companyForm("sector"))
+            @inputText(companyForm("ftJobs"))
+            @inputText(companyForm("ptJobs"))
+            @inputText(companyForm("legalForm"))
+            @inputText(companyForm("url"))
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-success">@Messages("application.next")</button>
+                </div>
+            </div>
+
+        }
+
+    </div>
+}

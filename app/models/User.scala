@@ -46,10 +46,13 @@ import scala.util.matching.Regex
 
 
 
-  def check(email:String,password:String,confirmPswd:String):Boolean ={
+  def check(email:String,password:String,confirmPswd:String):Boolean = {
     val uc = new Regex("[A-Z]")
     val lc = new Regex("[a-z]")
-    uc.findFirstIn(password).isDefined && lc.findFirstIn(password).isDefined && (password == confirmPswd) && password.length > 7 &&
+    uc.findFirstIn(password).isDefined &&
+      lc.findFirstIn(password).isDefined &&
+      (password == confirmPswd) &&
+      password.length > 7 &&
       (!Await.result(userDao.userExists(email),scala.concurrent.duration.Duration(1,"seconds")))
   }
 

@@ -19,6 +19,18 @@ GET     /javascriptRoutes           controllers.Application.javascriptRoutes
 
 GET     /userexists/:email          controllers.Application.userExists(email:String)
 
+GET     /company                    controllers.AppForm.companyInfo
+
+GET     /companyaddress             controllers.AppForm.companyAddress
+
+GET     /application                controllers.AppForm.application
+
+POST    /application                controllers.AppForm.insertApplication
+
+POST    /companyaddress             controllers.AppForm.insertCompanyAddress
+
+POST    /company                    controllers.AppForm.insertCompany
+
 POST    /useraddress                controllers.AppForm.insertUserAddress
 
 POST    /userdata                   controllers.Application.insertUser

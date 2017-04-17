@@ -1,0 +1,25 @@
+@(applicationForm:Form[LoanApplicationData])(implicit messages:Messages, flash:Flash)
+
+@import helper._
+@import views.fieldConstructors.BSHelpers._
+@import play.api.i18n._
+
+@user.usertemplate("application"){
+  <div class="container-fluid">
+    <h2>Loan requirements...</h2>
+    <br>
+    @form(action=routes.AppForm.insertApplication(), 'class->"form-horizontal"){
+      @inputText(applicationForm("amount"), args='_label->"Loan Amount")
+      @inputText(applicationForm("term"))
+      @inputText(applicationForm("jobsCreated"))
+      @inputText(applicationForm("loanPurpose"))
+      <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+          <button type="submit" class="btn btn-success">@Messages("application.submit")</button>
+        </div>
+      </div>
+
+    }
+
+  </div>
+}

@@ -31,7 +31,8 @@ class Application @Inject() (userDao:UserDAO, userForms: UserForms) (val message
               ("error"-> "[InsertUserAction] Please correct the errors in the form."))
           }, userData => {
           val futureUser = userDao.insert(User(userData.email,userData.password.hashCode,"user",
-                      None,None,None,None, None,None,new Timestamp(System.currentTimeMillis())))
+                      None,None,None,None,None,None,
+            new Timestamp(System.currentTimeMillis())))
           Redirect(routes.Application.login()).flashing("success" -> "User successfully added. Please log in!")
           }
         )
@@ -67,13 +68,19 @@ class Application @Inject() (userDao:UserDAO, userForms: UserForms) (val message
     )
   }
 
+  /**
+    * Check if a user is already registered. The boolean result is turned into
+    * a JSON object to enable the result to be used by the client browser. The function is called via AJAX.
+    * @param email
+    * @return
+    */
 
   def userExists(email:String) = Action { implicit request =>
     val f = Await.result(userDao.userExists(email),scala.concurrent.duration.Duration(1,"seconds"))
     val result = Json.toJson(f)
-    println("called function")
     Ok(result)
   }
+
 
   def javascriptRoutes = Action { implicit request =>
     Ok(

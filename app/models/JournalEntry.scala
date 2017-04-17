@@ -9,16 +9,16 @@ import models.AccountGroup.AccountGroup
   */
 
 
-// a ledger system is described by DEBITS and CREDITS
+// The Ledger consists of DEBITS and CREDITS
 
-sealed trait LedgerSide{
+sealed trait Ledger{
   def amount:BigDecimal
 }
 
 // Enter only non-negative amounts
 
-case class DEBIT(amount:BigDecimal) extends LedgerSide {require(amount>=0)}
-case class CREDIT(amount:BigDecimal) extends LedgerSide {require(amount>=0)}
+case class DEBIT(amount:BigDecimal) extends Ledger {require(amount>=0)}
+case class CREDIT(amount:BigDecimal) extends Ledger {require(amount>=0)}
 
 // the ledger system is broken down into groups of account type
 
@@ -35,14 +35,15 @@ case class Account(id:Int,name:String,group:AccountGroup){
 
 //A journalLine includes a monetary value as either a DEBIT or a CREDIT
 
-case class JournalLine(je:Int,account:Account,txn:LedgerSide,memo:Option[String])
+case class JournalLine(je:Int,account:Account,txn:Ledger,memo:Option[String])
 
 
 // A journal entry is made up of JournalLines
 
 case class JournalEntry(id:Int,date:LocalDate,jeLines:List[JournalLine]) {
 
-  // validate the journal entry: the sum of the CREDIT's must equal the sum of the DEBIT's
+  // validate the journal entry: the sum of the CREDIT's must equal the sum of the DEBIT's. This is achieved
+  // using a tail-recursive function
 
   def validateJE(jeLines: List[JournalLine]): Boolean = {
     def validJE(lines: List[JournalLine], sum: BigDecimal): Boolean = lines match {
