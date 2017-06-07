@@ -14,8 +14,6 @@ import scala.concurrent.Future
   * Created by geoffreywatson on 03/02/2017.
   */
 
-
-
 /**
   * define the User table mapping with the db. Note there is no need to add a 'Not Null' constraint where you would
   * normally in DDL since Slick provides this via the Option type (as in Scala).

@@ -1,0 +1,36 @@
+@(loanOffer: PreparedOffer, email:String)(implicit messages: Messages, flash: Flash)
+
+
+@admin.admintemplate("offer details"){
+
+    <div class="container">
+            <h2>Make Offer</h2>
+
+        <br>
+        <div class="row">
+            <div class="col-md-3">
+        <p>Send offer to: </p>
+        <p>Loan Amount: </p>
+        <p>Interest Rate: </p>
+        <p>Term: </p>
+        <p>Paymemt Amount: </p>
+        <p>Total amount to pay: </p>
+        <p>Total interest to pay: </p>
+            </div>
+            <div class="col-md-3">
+        <p>@email</p>
+        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.loanValue)</p>
+        <p>@("%04.2f".format(loanOffer.offerAPR * 100))%</p>
+        <p>@loanOffer.term Months</p>
+        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.getPmt())</p>
+        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalToPay())</p>
+        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalInterestToPay())</p>
+            </div>
+        </div>
+
+
+        <button class="btn btn-info">SEND OFFER</button>
+
+    </div>
+
+}

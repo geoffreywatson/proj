@@ -9,7 +9,7 @@ GET     /login                      controllers.Application.login
 
 GET     /register                   controllers.Application.register
 
-GET     /applications               controllers.AppForm.admin
+GET     /applications               controllers.Admin.loanApps
 
 GET     /contact                    controllers.AppForm.contactInfo
 
@@ -24,6 +24,12 @@ GET     /company                    controllers.AppForm.companyInfo
 GET     /companyaddress             controllers.AppForm.companyAddress
 
 GET     /application                controllers.AppForm.application
+
+GET     /showapplication/:id        controllers.Admin.showApplication(id:Long)
+
+GET     /send                       controllers.Mailer.send
+
+POST    /reviewapp                  controllers.Admin.insertReviewData
 
 POST    /application                controllers.AppForm.insertApplication
 

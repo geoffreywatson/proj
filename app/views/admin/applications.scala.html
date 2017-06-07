@@ -1,6 +1,30 @@
-@(message:String)(implicit messages:Messages, flash:Flash)
+@(apps:Seq[(java.sql.Timestamp,Long,String,String,BigDecimal,Int)])(implicit messages:Messages, flash:Flash)
 
-@admin.admintemplate(message){
+@admin.admintemplate("view applications"){
 
-    <h2>Injected into Admin template</h2>
+    <div class="container">
+        <h2>Applications Received</h2>
+        <br>
+        <table class="table table-hover">
+            <tr>
+                <th>Received</th>
+                <th>Application ID</th>
+                <th>Business Name</th>
+                <th>Postcode</th>
+                <th>Amount</th>
+                <th>Term</th>
+            </tr>
+            @for(a <- apps){
+                <tr>
+                    <td>@a._1</td>
+                    <td><a href="@routes.Admin.showApplication(a._2)">@a._2</a></td>
+                    <td>@a._3</td>
+                    <td>@a._4</td>
+                    <td>£@("%.2f".format(a._5))</td>
+                    <td>@a._6</td>
+                </tr>
+            }
+        </table>
+    </div>
+
 }

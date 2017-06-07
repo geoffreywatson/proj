@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import models._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, Controller, Flash}
+import play.api.mvc.{Controller, Flash}
 import services.{AddressDAO, CompanyDAO, LoanApplicationDAO, UserDAO}
 
 /**
@@ -47,8 +47,7 @@ class AppForm @Inject()(addressDAO: AddressDAO, userDao:UserDAO, companyForms:Co
         Ok(views.html.user.contact(form))
   }
 
-  def admin = Action { implicit request =>
-    Ok(views.html.admin.applications("admin"))}
+
 
 
   /**
@@ -63,6 +62,7 @@ class AppForm @Inject()(addressDAO: AddressDAO, userDao:UserDAO, companyForms:Co
       AddressForms.form
     Ok(views.html.user.useraddress(form))
   }
+
 
   /**
     * insert user's address by calling the addressDAO to perform the insert db operation.

@@ -1,0 +1,99 @@
+@import models.ApplicationReview
+@import helper._
+@import play.api.i18n._
+
+
+@(app:ApplicationReview, reviewForm:Form[ReviewFormData])(implicit flash:Flash,messages:Messages)
+
+@admin.admintemplate("application detail") {
+
+    <div class="container">
+        <h2>Application Details</h2>
+        <hr>
+        <div class="row">
+            <div class="col-md-3">
+                <h4>Business Name:</h4>
+                <h4>Business Address:</h4>
+            </div>
+            <div class="col-md-3">
+                <h4>@app.company.name</h4>
+                <h4>@app.coAddress.line1</h4>
+                <h4>@app.coAddress.line2</h4>
+                <h4>@app.coAddress.line3</h4>
+                <h4>@app.coAddress.city</h4>
+                <h4>@app.coAddress.county</h4>
+                <h4>@app.coAddress.postcode</h4>
+            </div>
+            <div class="col-md-3">
+                <h4>Business Sector:</h4>
+                <h4>Trading Date:</h4>
+                <h4>Legal Form:</h4>
+                <h4>Current Full-time Jobs:</h4>
+                <h4>Current Part-tme Jobs:</h4>
+                <h4>URL:</h4>
+            </div>
+            <div class="col-md-3">
+                <h4>@app.company.sector</h4>
+                <h4>@app.company.tradingDate</h4>
+                <h4>@app.company.legalForm</h4>
+                <h4>@("%.1f".format(app.company.ftJobs))</h4>
+                <h4>@("%.1f".format(app.company.ptJobs))</h4>
+                <h4>@app.company.url</h4>
+            </div>
+
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-3">
+                <h4>Applicant Full Name:</h4>
+                <h4>NIN:</h4>
+                <h4>D.O.B:</h4>
+                <h4>Address:</h4>
+            </div>
+            <div class="col-md-3">
+                <h4>@app.user.title @app.user.firstName @app.user.lastName</h4>
+                <h4>@app.user.nin</h4>
+                <h4>@app.user.dob</h4>
+                <h4>@app.userAdrress.line1</h4>
+                <h4>@app.userAdrress.line2</h4>
+                <h4>@app.userAdrress.line3</h4>
+                <h4>@app.userAdrress.city</h4>
+                <h4>@app.userAdrress.county</h4>
+                <h4>@app.userAdrress.postcode</h4>
+
+
+            </div>
+            <div class="col-md-3">
+                <h4>Loan Amount:</h4>
+                <h4>Term:</h4>
+                <h4>Purpose:</h4>
+                <h4>Expected new jobs created:</h4>
+            </div>
+            <div class="col-md-3">
+                <h4>£@("%.2f".format(app.loanApplication.amount))</h4>
+                <h4>@app.loanApplication.term months</h4>
+                <h4>@app.loanApplication.loanPurpose</h4>
+                <h4>@("%.1f".format(app.loanApplication.jobsCreated))</h4>
+
+            </div>
+        </div>
+<div class="container-fluid">
+        @form(action=routes.Admin.insertReviewData(),'class->"form-horizontal"){
+            @inputText(reviewForm("comments"))
+            @checkbox(reviewForm("accepted"), args = 'value -> true)
+            @inputText(reviewForm("offerAPR"))
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-success">@Messages("Complete")</button>
+                </div>
+            </div>
+        }
+</div>
+
+
+
+
+
+    </div>
+
+}
