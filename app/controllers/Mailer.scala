@@ -3,17 +3,17 @@ package controllers
 import javax.inject.Inject
 
 import play.api.libs.mailer._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 /**
   * Created by geoffreywatson on 31/05/2017.
   */
-class Mailer @Inject() (mailer:MailerClient) extends Controller{
+class Mailer @Inject() (mailer:MailerClient, authAction:AuthAction, cc:ControllerComponents) extends AbstractController(cc){
 
 
 
 
-  def send = Action{
+  def send = authAction{
 
 
     val cid = "1234"

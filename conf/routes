@@ -45,7 +45,6 @@ POST    /login                      controllers.Application.loginUser
 
 POST    /userdetails                controllers.AppForm.insertUserDetails
 
-
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count
 # An example controller showing how to write asynchronous code

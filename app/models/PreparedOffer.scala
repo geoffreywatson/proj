@@ -7,7 +7,7 @@ import services.FinOps
   */
 case class PreparedOffer(loanValue:BigDecimal, offerAPR:BigDecimal, term:Int) {
   def getPmt():BigDecimal = {
-      FinOps.pmtAmt(this)
+      FinOps.pmtAMT(this)
   }
   def totalToPay():BigDecimal = {
     getPmt() * term

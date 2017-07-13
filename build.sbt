@@ -1,20 +1,22 @@
 name := """proj"""
 
-version := "1.0-SNAPSHOT"
+version := "2.6.x"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.2"
 
 libraryDependencies ++= Seq(
   cache,
   ws,
+  guice,
   "mysql" % "mysql-connector-java" % "5.1.34",
-  "com.typesafe.play" %% "play-slick" % "2.0.0",
-  "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
-  "com.typesafe.play" %% "play-mailer" % "5.0.0",
+  "com.typesafe.play" %% "play-slick" % "3.0.0-M5",
+  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.0-M5",
+  "com.typesafe.play" %% "play-mailer" % "6.0.0",
+  "com.typesafe.play" %% "play-mailer-guice" % "6.0.0",
 
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % Test
 
 )
 

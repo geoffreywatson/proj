@@ -6,7 +6,7 @@ import play.i18n.MessagesApi
  * add your integration spec here.
  * An integration test will fire up a whole play application in a real (or headless) browser
  */
-class IntegrationSpec (val messagesApi: MessagesApi)extends PlaySpec with OneServerPerTest
+class IntegrationSpec extends PlaySpec with OneServerPerTest
   with OneBrowserPerTest with HtmlUnitFactory with I18nSupport {
 
   "Application" should {
