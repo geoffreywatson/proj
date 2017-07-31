@@ -13,7 +13,7 @@ class UserSpec @Inject()(userDao:UserDAO) extends PlaySpec {
   "a usertemplate form" must {
     "throw exception " in {
       a [Exception] must be thrownBy {
-        val form = new UserForms(userDao).userForm
+        val form = new UserForms(userDao).userRegForm
         form.bind(Map("email" -> "g@g.com"))
       }
     }

@@ -1,6 +1,7 @@
-@(apps:Seq[(java.sql.Timestamp,Long,String,String,BigDecimal,Int)])(implicit messages:Messages, flash:Flash)
+@(apps:Seq[(java.sql.Timestamp,Long,String,String,BigDecimal,Int,String)])(implicit messages:Messages, flash:Flash)
 
 @admin.admintemplate("view applications"){
+
 
     <div class="container">
         <h2>Applications Received</h2>
@@ -13,6 +14,7 @@
                 <th>Postcode</th>
                 <th>Amount</th>
                 <th>Term</th>
+                <th>Status</th>
             </tr>
             @for(a <- apps){
                 <tr>
@@ -22,6 +24,7 @@
                     <td>@a._4</td>
                     <td>£@("%.2f".format(a._5))</td>
                     <td>@a._6</td>
+                    <td>@a._7</td>
                 </tr>
             }
         </table>

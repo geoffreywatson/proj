@@ -1,15 +1,18 @@
 package services
 
 import java.sql.Timestamp
+import java.text.SimpleDateFormat
 import javax.inject.Inject
 
-import models.{Company, UserCompany}
+import models.{Company, CompanyAddress, UserCompany}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 
 import scala.concurrent.{Await, Future, duration}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.io.Source
+import scala.util.Success
 
 /**
   * Created by geoffreywatson on 13/03/2017.
@@ -54,6 +57,7 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
 
   val companies = TableQuery[CompanyTable]
   val userComps = TableQuery[UserCompanyTable]
+  val companyAddresses = TableQuery[CompanyAddressTable]
 
   val insertCompQuery = companies returning companies.map(_.id) into ((comp,id) => comp.copy(id = id))
 
@@ -73,6 +77,87 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
       case None => throw new Exception("no usercompany")
     }
     userCompanyID
+  }
+
+
+  def loadData = {
+
+    db.run(companies.length.result) onComplete{
+      case Success(l) => if(l==0){
+        loadCompanyData onComplete{
+          case Success(l) => l match {
+            case 62 => {
+              println("Success - 62 companies loaded")
+              db.run(userComps.length.result) onComplete {
+                case Success(l) => if(l==0){
+                  loadUserCompanyData
+                }
+              }
+            }
+            case _ => println("An error occurred")
+          }
+        }
+      }
+    }
+
+    Thread.sleep(3000)
+
+
+
+    Thread.sleep(3000)
+
+    db.run(companyAddresses.length.result) onComplete {
+      case Success(l) => if(l==0) {
+        loadCompanyAddressData
+      }
+    }
+
+
+
+    def insertCompany(company:Company):Unit ={
+      db.run(companies += company).map{_=> ()}
+    }
+
+    def insertUserCompany(userCompany: UserCompany):Unit ={
+      db.run(userComps += userCompany).map{_=>()}
+    }
+
+    def insertCompanyAddress(companyAddress:CompanyAddress):Unit = {
+      db.run(companyAddresses += companyAddress).map{_=>()}
+    }
+
+    def loadCompanyData:Future[Int] = {
+      val source = Source.fromFile("./public/sampledata/companydata.csv")
+      val sdf = new SimpleDateFormat("yyyy/MM/dd")
+      for (line <- source.getLines().drop(1)){
+        val cols = line.split(",").map(_.trim)
+        val company = Company(0,cols(0),new java.sql.Date(sdf.parse(cols(1)).getTime()),cols(2),
+          BigDecimal(cols(3)),BigDecimal(cols(4)),cols(5),None,new java.sql.Timestamp(System.currentTimeMillis()))
+        insertCompany(company)
+      }
+      source.close()
+      db.run(companies.length.result)
+    }
+
+    def loadUserCompanyData = {
+      val source = Source.fromFile("./public/sampledata/usercompanydata.csv")
+      for (line <- source.getLines().drop(1)){
+        val cols = line.split(",").map(_.trim)
+        val userCompany = UserCompany(0,cols(0),cols(1).toLong,new Timestamp(System.currentTimeMillis()))
+        insertUserCompany(userCompany)
+      }
+      source.close()
+    }
+
+    def loadCompanyAddressData = {
+      val source = Source.fromFile("./public/sampledata/companyaddressdata.csv")
+      for (line <- source.getLines().drop(1)){
+        val cols = line.split(",").map(_.trim)
+        val companyAddress = CompanyAddress(0,cols(0).toLong,cols(1).toLong)
+        insertCompanyAddress(companyAddress)
+      }
+      source.close()
+    }
   }
 
   //val insertUserCompQuery = userComps returning userComps.map(_.id) into ((usrComp, id) => usrComp.copy(id = id))

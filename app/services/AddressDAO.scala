@@ -9,6 +9,8 @@ import slick.driver.MySQLDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.io.Source
+import scala.util.Success
 
 /**
   * Created by geoffreywatson on 21/02/2017.
@@ -109,6 +111,62 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
           case addrs => db.run(compAddresses += CompanyAddress(0, uc.cid, addrs.id))
         }
       case None => new Exception("no company found")
+
+    }
+  }
+
+
+
+  def loadData = {
+
+    println("Called AddressDAO.loadData...")
+
+
+    db.run(addresses.length.result) onComplete {
+      case Success(l) => l match {
+        case 0 => loadAddresses
+      }
+    }
+    Thread.sleep(3000)
+
+    db.run(userAddresses.length.result) onComplete {
+      case Success(l) => if(l==0){
+        loadUserAddress
+      }
+    }
+
+
+
+
+    def insertAddress(address: Address): Future[Unit] = {
+      db.run(addresses += address).map { _ => () }
+    }
+
+    def insertUserAddress(userAddress:UserAddress): Future[Unit] = {
+      db.run(userAddresses += userAddress).map{_=>()}
+    }
+
+    def loadAddresses:Unit = {
+      val source = Source.fromFile("./public/sampledata/addressdata.csv")
+      for (line <- source.getLines().drop(1)) {
+        val cols = line.split(",").map(_.trim)
+        val address = Address(0, cols(0), cols(1), cols(2), cols(3), cols(4), cols(5),
+          new java.sql.Timestamp(System.currentTimeMillis()))
+        insertAddress(address)
+      }
+      source.close()
+    }
+
+    def loadUserAddress = {
+      val source = Source.fromFile("./public/sampledata/useraddressdata.csv")
+      //val listBuffer:ListBuffer[UserAddress] = new ListBuffer[UserAddress]()
+      for (line <- source.getLines().drop(1)){
+        val cols = line.split(",").map(_.trim)
+        val userAddress = UserAddress(0,cols(0),cols(1).toLong)
+        insertUserAddress(userAddress)
+
+      }
+      source.close()
 
     }
   }

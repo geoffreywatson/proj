@@ -1,4 +1,4 @@
-@(loanOffer: PreparedOffer, email:String)(implicit messages: Messages, flash: Flash)
+@(loanOffer: PreparedOffer, email:(String,String))(implicit messages: Messages, flash: Flash)
 
 
 @admin.admintemplate("offer details"){
@@ -7,27 +7,35 @@
             <h2>Make Offer</h2>
 
         <br>
+
         <div class="row">
             <div class="col-md-3">
         <p>Send offer to: </p>
+        <p>Name: </p>
+        <p>Business Name:</p>
         <p>Loan Amount: </p>
         <p>Interest Rate: </p>
         <p>Term: </p>
-        <p>Paymemt Amount: </p>
+        <p>Monthly Payment Amount: </p>
         <p>Total amount to pay: </p>
         <p>Total interest to pay: </p>
             </div>
             <div class="col-md-3">
-        <p>@email</p>
+        <p>@email._1</p>
+        <p>@email._2</p>
+        <p>@loanOffer.businessName</p>
         <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.loanValue)</p>
         <p>@("%04.2f".format(loanOffer.offerAPR * 100))%</p>
         <p>@loanOffer.term Months</p>
-        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.getPmt())</p>
-        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalToPay())</p>
-        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalInterestToPay())</p>
+        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.getPmt)</p>
+        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalToPay)</p>
+        <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalInterestToPay)</p>
+
 
                 <br>
-                <button class="btn btn-info">SEND OFFER</button>
+                <a href="@controllers.routes.Mailer.sendOfferAccept(email._1,email._2)">
+                    <button class="btn btn-danger" type="button">SEND OFFER</button>
+                </a>
             </div>
         </div>
 

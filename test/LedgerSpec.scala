@@ -21,11 +21,10 @@ class LedgerSpec extends PlaySpec {
     "throw IllegalArgumentException if the sum of the CREDITS does not equal the sum " +
       "of the DEBITS" in{
       a [IllegalArgumentException] must be thrownBy {
-        JournalEntry(1,LocalDate.now(),List(
-          JournalLine(1,Account(1000,"Cash",AccountGroup.ASSET),CREDIT(BigDecimal(1000)),None),
-          JournalLine(1,Account(1200,"Loan Debtor",AccountGroup.ASSET),DEBIT(BigDecimal(1020)),None),
-          JournalLine(1,Account(4010,"Arrangement Fees",AccountGroup.INCOME),CREDIT(BigDecimal(25)),None)
-
+        CompleteJournalEntry(LocalDate.now(),List(
+          JournalLine(1,1,1050,1000,None,None),
+          JournalLine(2,1,1200,200,None,None),
+          JournalLine(3,1,1400,-1250,None,None)
         ))
       }
     }

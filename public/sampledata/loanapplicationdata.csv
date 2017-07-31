@@ -1,0 +1,63 @@
+ucid,amount,term,jobs created,loan purpose,reviewedBy,comments,approved,offerAPR,offerDate,offerAccepted,status
+1,6000,24,2,asset purchase,admin@email.com,Comments for Timothy's Ltd,1,0.125,2016/12/10,2016/12/10,Drawndown
+2,58000,36,3,office expansion,admin@email.com,Comments for Jackson Swinton LLP,1,0.08,2017/03/31,,Lapsed
+3,8000,48,2,working capital,admin@email.com,Comments for Ali's,1,0.08,2017/06/30,2017/06/30,Drawndown
+4,5000,48,4,asset purchase,admin@email.com,Comments for About Dance,1,0.095,2017/06/30,2017/06/30,Drawndown
+5,72000,60,5,asset purchase,admin@email.com,Comments for 24H Network,0,0,,,Decline
+6,93000,60,3,office expansion,admin@email.com,Comments for A Grand Car,0,0,,,Decline
+7,8000,60,2,working capital,admin@email.com,Comments for A P Salvage,1,0.125,2017/07/31,2017/07/31,Drawndown
+8,90000,24,3,marketing campaign,admin@email.com,Comments for Absolutely Fabulous,0,0,,,Decline
+9,11000,12,5,asset purchase,admin@email.com,Comments for Blondies,0,0,,,Decline
+10,36000,6,2,lease renewal,admin@email.com,Comments for BUSY BEES,1,0.125,2016/06/22,2016/06/22,Drawndown
+11,6000,60,1,leasehold improvement,admin@email.com,Comments for Clink,1,0.125,2016/03/01,2016/03/06,Drawndown
+12,2000,48,1,new equipment,admin@email.com,Comments for Cooking Cooks,1,0.125,2016/09/22,,Lapsed
+13,3000,24,1,training,admin@email.com,Comments for DPTrading,0,0,,,Decline
+14,1000,12,1,advertising,admin@email.com,Comments for Envy Tanning,0,0,,,Decline
+15,8000,36,2,asset purchase,admin@email.com,Comments for White Muffin,0,0,,,Decline
+16,1000,18,0,office expansion,admin@email.com,Comments for Tinderbox,1,0.125,2017/02/01,2017/02/05,Drawndown
+17,18000,18,5,working capital,admin@email.com,Comments for Samuel Y Culling Ltd,1,0.125,2017/01/05,2017/01/05,Drawndown
+18,76000,60,6,asset purchase,admin@email.com,Comments for Drop Dead,0,0,,,Decline
+19,66000,60,5,asset purchase,admin@email.com,Comments for The Broth Hall,0,0,,,Decline
+20,3000,48,4,office expansion,admin@email.com,Comments for Doug Wilson Ltd,0,0,,,Decline
+21,67000,24,3,working capital,admin@email.com,Comments for Jani Kiro,1,0.125,2017/02/06,,Lapsed
+22,53000,12,2,marketing campaign,admin@email.com,Comments for Sweet Treats Ltd,0,0,,,Decline
+23,81000,48,3,asset purchase,admin@email.com,Comments for Openout Ltd,0,0,,,Decline
+24,39000,60,4,lease renewal,admin@email.com,Comments for Swinbrook LLP,1,0.06,2016/09/08,2016/09/08,Drawndown
+25,2000,60,3,leasehold improvement,admin@email.com,Comments for Total Care Solutions,0,0,,,Decline
+26,3000,60,4,new equipment,admin@email.com,Comments for Frontop,0,0,,,Decline
+27,21000,24,5,training,admin@email.com,Comments for Quizzos,1,0.1,2016/05/22,2016/05/22,Drawndown
+28,7000,12,6,advertising,admin@email.com,Comments for Dupe Marketing Ltd,0,0,,,Decline
+29,12500,6,10,asset purchase,admin@email.com,Comments for Rich Kyert Contractor,0,0,,,Decline
+30,52000,60,5,office expansion,admin@email.com,Comments for More Muffins Please,1,0.105,2016/05/06,2016/05/06,Drawndown
+31,66000,48,4,working capital,admin@email.com,Comments for Morning Bake,0,0,,,Decline
+32,3000,24,2,asset purchase,admin@email.com,Comments for Flower of Life Limited,1,0.08,2016/05/05,2016/05/05,Drawndown
+33,32000,12,3,asset purchase,admin@email.com,Comments for Fornetti,1,0.09,2017/05/05,2017/05/05,Drawndown
+34,9000,36,2,office expansion,admin@email.com,Comments for G & L Fitness,1,0.1,2017/07/06,2017/07/06,Accepted
+35,6000,18,2,working capital,admin@email.com,Comments for Giquino,0,0,,,Decline
+36,38000,18,2,marketing campaign,admin@email.com,Comments for Grass Hopper Maintenance,1,0.125,2016/05/05,2016/05/05,Drawndown
+37,10000,60,3,asset purchase,admin@email.com,Comments for Hair & Beauty Supplies,1,0.105,2017/06/06,2017/06/06,Drawndown
+38,95000,60,4,lease renewal,admin@email.com,Comments for Harris Plumbing,1,0.06,2017/09/18,2017/09/18,Drawndown
+39,14000,48,5,leasehold improvement,admin@email.com,Comments for Henley's,1,0.08,2017/09/15,2017/09/15,Drawndown
+40,2000,24,5,new equipment,admin@email.com,Comments for HoneyComb Ltd,0,0,,,Decline
+41,41000,12,6,training,admin@email.com,Comments for La Palma,1,0.1,2016/01/04,2016/01/04,Drawndown
+42,7000,48,3,advertising,admin@email.com,Comments for Lets Create,1,0.11,2016/03/03,2016/03/03,Drawndown
+43,9000,60,4,asset purchase,admin@email.com,Comments for Light House,1,0.125,2016/02/05,2016/02/05,Drawndown
+44,97000,60,3,office expansion,admin@email.com,Comments for Luka Superior Interiors,0,0,,,Decline
+45,8000,60,2,working capital,admin@email.com,Comments for Manic Science,0,0,,,Decline
+46,7000,24,5,asset purchase,admin@email.com,Comments for Mishri Foods Limited,1,0.08,2017/05/05,2017/05/05,Drawndown
+47,48000,12,2,asset purchase,admin@email.com,Comments for NC NEWS,1,0.09,2017/09/04,2017/09/04,Drawndown
+48,29000,6,3,office expansion,admin@email.com,Comments for Perk Coffee Shops Limited,0,0,,,Decline
+49,5000,60,4,working capital,admin@email.com,Comments for Sweltering,1,0.11,2017/06/06,,Lapsed
+50,8000,48,3,marketing campaign,admin@email.com,Comments for Sun Spot Vacations,0,0,,,Decline
+51,4000,24,3,asset purchase,admin@email.com,Comments for Outdoor Craft,1,0.105,2016/05/05,,Lapsed
+52,77000,12,4,lease renewal,admin@email.com,Comments for Hobbies & More,0,0,,,Decline
+53,8000,36,5,leasehold improvement,admin@email.com,Comments for Vape Cafe,1,0.195,2016/12/12,2016/12/13,Drawndown
+54,8000,18,2,new equipment,admin@email.com,Comments for Red Rooster Designs,0,0,,,Decline
+55,58000,18,1,training,admin@email.com,Comments for Tony Pickering Contractor,1,0.115,2016/12/11,2016/12/15,Drawndown
+56,2000,60,1,advertising,admin@email.com,Comments for Luois & David,0,0,,,Decline
+57,60000,60,1,asset purchase,admin@email.com,Comments for Smart Alex,1,0.105,2016/11/11,,Lapsed
+58,73000,48,1,lease renewal,admin@email.com,Comments for Lemon & Lime,1,0.185,2016/11/10,2016/11/10,Drawndown
+59,67000,24,2,leasehold improvement,admin@email.com,Comments for Accilla,1,0.195,2016/09/09,2016/09/10,Drawndown
+60,5000,12,2,new equipment,admin@email.com,Comments for Winterborn Grass,1,0.155,2017/01/04,2017/01/05,Drawndown
+61,5000,24,4,training,admin@email.com,Comments for Makeover,1,0.115,2017/03/02,2017/03/05,Drawndown
+62,1000,12,3,advertising,admin@email.com,Comments for Total Haulage,0,0,,,Decline

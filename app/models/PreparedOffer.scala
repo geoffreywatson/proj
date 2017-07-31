@@ -5,15 +5,16 @@ import services.FinOps
 /**
   * Created by geoffreywatson on 04/06/2017.
   */
-case class PreparedOffer(loanValue:BigDecimal, offerAPR:BigDecimal, term:Int) {
-  def getPmt():BigDecimal = {
-      FinOps.pmtAMT(this)
+case class PreparedOffer(loanAppId:Long,businessName:String,loanValue:BigDecimal, offerAPR:BigDecimal, term:Int) {
+
+  val getPmt = {
+      FinOps.pmtAmount(loanValue,term,offerAPR)
   }
-  def totalToPay():BigDecimal = {
-    getPmt() * term
+  val totalToPay = {
+    getPmt * term
   }
-  def totalInterestToPay():BigDecimal = {
-    totalToPay() - loanValue
+  val totalInterestToPay = {
+    totalToPay - loanValue
   }
 
 }

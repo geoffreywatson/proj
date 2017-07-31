@@ -1,0 +1,24 @@
+@(loanId:Long,status:String,user:String)(implicit messages:Messages, flash:Flash)
+
+
+
+@usertemplate("Welcome"){
+
+    <div class="container">
+        @status match {
+            case "DECLINE" => {<h2>@messages("application.decline")</h2>}
+            case "Approved" => {
+                <div class="container">
+                    <h2>@messages("application.approve")</h2>
+               <br>
+                    <a href="@routes.Admin.viewOffer(loanId)"><button class="btn btn-success btn-large">Offer Details</button></a>
+
+                </div>
+
+
+                }
+            case "Submitted" => {<h2>@messages("application.submitted")</h2>}
+            case "Accepted" => {<h2>@messages("application.accepted")</h2>}
+        }
+    </div>
+}

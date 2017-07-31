@@ -1,8 +1,7 @@
 package models
 
+import java.sql.Timestamp
 import java.time.LocalDate
-
-import models.AccountGroup.AccountGroup
 
 /**
   * Created by geoffreywatson on 01/02/2017.
@@ -17,46 +16,45 @@ sealed trait Ledger{
 
 // Enter only non-negative amounts
 
-case class DEBIT(amount:BigDecimal) extends Ledger {require(amount>=0)}
-case class CREDIT(amount:BigDecimal) extends Ledger {require(amount>=0)}
+case class DEBIT(amount:BigDecimal) extends Ledger {require(amount >= 0)}
+case class CREDIT(amount:BigDecimal) extends Ledger {require(amount >= 0)}
 
-// the ledger system is broken down into groups of account type
 
-object AccountGroup extends Enumeration{
-  type AccountGroup = Value
-  val INCOME, EXPENDITURE, ASSET, LIABILITY, EQUITY = Value
+
+
+// An account must have a number, a name and be assigned to an account group.
+
+case class Account(id:Int,name:String,accountGroup:String){
+  require(id > 0)
 }
 
-// An account must be a member of an AccountGroup
-
-case class Account(id:Int,name:String,group:AccountGroup){
-  require(id>0)
-}
+case class JournalEntry(id:Long,created:Timestamp,entryDate:java.sql.Date)
 
 //A journalLine includes a monetary value as either a DEBIT or a CREDIT
 
-case class JournalLine(je:Int,account:Account,txn:Ledger,memo:Option[String])
+case class JournalLine(id:Long,jeId:Long,accId:Int,amount:BigDecimal, memo:Option[String],laId:Option[Long])
+
+//case class JLine(jeId:Long,accId:Int,txn:Ledger,memo:Option[String],laId:Option[Long])
 
 
 // A journal entry is made up of JournalLines
 
-case class JournalEntry(id:Int,date:LocalDate,jeLines:List[JournalLine]) {
+case class CompleteJournalEntry(entryDate:LocalDate,journalEntryLines:List[JournalLine]) {
 
-  // validate the journal entry: the sum of the CREDIT's must equal the sum of the DEBIT's. This is achieved
-  // using a tail-recursive function
+  // validate the journal entry: the sum of the amount field in JournalLine must be 0. This is like sum of Debits is equal
+  // to sum of Credits for a double-entry ledger system.
 
-  def validateJE(jeLines: List[JournalLine]): Boolean = {
+  def validateJE(jLines: List[JournalLine]): Boolean = {
     def validJE(lines: List[JournalLine], sum: BigDecimal): Boolean = lines match {
       case Nil => sum == BigDecimal(0)
-      case hd :: tl => hd.txn match {
-        case x: DEBIT => validJE(tl, sum + x.amount)
-        case x: CREDIT => validJE(tl, sum - x.amount)
-      }
+      case hd :: tl => validJE(lines.tail,sum + hd.amount)
     }
-    validJE(jeLines, BigDecimal(0))
+    validJE(jLines, 0)
   }
-  require(validateJE(jeLines))
+  require(validateJE(journalEntryLines))
 }
+
+case class AmortizationLine(date:LocalDate,obal:BigDecimal,drawdown:BigDecimal,int:BigDecimal,pmt:BigDecimal,ebal:BigDecimal)
 
 
 

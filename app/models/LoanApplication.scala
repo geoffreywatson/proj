@@ -13,14 +13,14 @@ import javax.inject.Inject
 
 case class LoanApplication(id:Long, uCoID:Long,amount:BigDecimal,term:Int,jobsCreated:BigDecimal,
                            loanPurpose:String,created:Timestamp, reviewed:Option[Timestamp], reviewedBy:Option[String],
-                           comments:Option[String], accepted:Option[Boolean], offerAPR:Option[BigDecimal],
-                           offerDate:Option[Timestamp], offerAccepted:Option[Timestamp])
+                           comments:Option[String], approved:Option[Boolean], offerAPR:Option[BigDecimal],
+                           offerDate:Option[Timestamp], offerAccepted:Option[Timestamp], status:String)
 
 
 case class ReviewFormData(comments:String,accepted:Boolean,offerAPR:BigDecimal)
 
 case class ReviewData(reviewed:Timestamp,reviewedBy:String,comments:String,accepted:Boolean,
-                      offerAPR:BigDecimal,offerDate:Timestamp)
+                      offerAPR:BigDecimal)
 
 case class LoanOffer (offerAPR:BigDecimal,created:Timestamp,offerAccepted:Timestamp)
 
@@ -40,9 +40,9 @@ class LoanApplicationForms @Inject()(){
 
   val reviewForm = Form(
     mapping(
-      "comments" -> text,
-      "accepted" -> boolean,
-      "offerAPR" -> bigDecimal.verifying(x => (x > 0 && x <= .20))
+      "comments" -> nonEmptyText,
+      "accepted" -> default(boolean,false),
+      "offerAPR" -> bigDecimal.verifying(x => (x >= 0 && x <= 100))
     ) (ReviewFormData.apply)(ReviewFormData.unapply)
   )
 

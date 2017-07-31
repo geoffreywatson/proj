@@ -1,14 +1,17 @@
 package services
 
+import java.text.SimpleDateFormat
+
 import com.google.inject.Inject
 import models.{ContactFormData, User}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
+import scala.io.Source
+import scala.util.Success
+//import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by geoffreywatson on 03/02/2017.
@@ -51,6 +54,8 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider) extends Ha
     //db.run(action)
   //}
 
+  import scala.concurrent.ExecutionContext.Implicits.global
+
   def findByEmail(email:String): Future[Option[User]] = db.run(users.filter(_.email===email).result.headOption)
   def insert(usertemplate:User): Future[Unit] = db.run(users += usertemplate).map{_ => ()}
 
@@ -60,7 +65,6 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider) extends Ha
       Some(userData.lastName), Some(userData.dob), Some(userData.nin)
   )).map{_ => ()}
 
-
   //def findByUsername(username:String): Future[Option[User]] = db.run((for (user <- users if user.email === username) yield user).result.headOption)
 
 
@@ -68,5 +72,42 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider) extends Ha
 
   def validateUser(email:String,password:String): Future[Boolean] = db.run(users.filter(
     user => (user.email===email && user.pswdHash === password.hashCode)).exists.result)
+
+
+  def loadData = {
+
+    db.run(users.length.result) onComplete{
+
+      case Success(l) => if(l==0) {
+       println("l is 0?: " + l)
+        loadUserData
+      } else {
+        println("l was not 0: " + l)
+      }
+    }
+
+
+    def loadUserData = {
+
+      val list:Source = Source.fromFile("./public/sampledata/userdata.csv")
+      val source = Source.fromFile("./public/sampledata/userdata.csv")
+      for (line <- source.getLines().drop(1)) {
+        val cols = line.split(",").map(_.trim)
+        val sdf = new SimpleDateFormat("yyyy/MM/dd")
+        val user = User(cols(0), cols(1).toInt, cols(2), Some(cols(4)), Some(cols(5)), None, Some(cols(7)),
+          Some(new java.sql.Date(sdf.parse(cols(8)).getTime)),
+          Some(cols(9)),
+          new java.sql.Timestamp(System.currentTimeMillis()))
+        insert(user)
+      }
+      source.close()
+    }
+
+
+
+
+
+
+  }
 
 }

@@ -10,17 +10,21 @@ import play.api.mvc.{AbstractController, ControllerComponents}
   */
 class Mailer @Inject() (mailer:MailerClient, authAction:AuthAction, cc:ControllerComponents) extends AbstractController(cc){
 
+  /**
+    * send an email to a user.
+    * @return
+    */
 
 
 
-  def send = authAction{
+  def sendOfferAccept(user:String, fullname:String) = authAction{
 
 
     val cid = "1234"
     val email = Email(
-      "EMAIL SUBJECT",
-      "BLAH! Customer Service <blah@email.com>",
-      Seq("Miss TO <geoff777@gmail.com>"),
+      "Important For You",
+      "Applications <applications@email.com>",
+      Seq(" <" + user + ">"),
       bodyText = Some("a text message"),
       bodyHtml = Some(s"""<html><head>
                     <title>@title</title>
@@ -40,14 +44,14 @@ class Mailer @Inject() (mailer:MailerClient, authAction:AuthAction, cc:Controlle
         <script type="text/javascript" src="@routes.Application.javascriptRoutes"></script>
                            </head><body>
       <div class="container">
-      <div class="jumbotron"><button class="btn btn-success">Push Me!</button></div>
-      <p>An <b>HTML</b> message with cid <img src="cid:$cid"></p>
+      <div class="jumbotron"><button class="btn btn-success"><a href="http://localhost:9000/login">Login!</a></button></div>
+      <p>An <b>HTML</b> Loan application accepted  <img src="cid:$cid"></p>
       </div>
       </body></html>""")
 
     )
-    val id = mailer.send(email)
-    Ok(s"Email $id sent!")
+    val id = mailer.send(email).toString + " Sent OK"
+    Redirect(routes.Admin.loanApps()).flashing("success" -> id)
 
   }
 

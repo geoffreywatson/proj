@@ -1,0 +1,45 @@
+@(preparedOffer: PreparedOffer)(implicit messages: Messages, flash: Flash)
+
+
+
+    @usertemplate("offer details"){
+
+
+    <div class="container">
+        <h3>Offer Details</h3>
+        <hr>
+        <div class="row">
+            <div class="col-md-4">
+                <h4>
+                    <p>Application ID:</p>
+                    <p>Business Name:</p>
+                    <p>Loan Value:</p>
+                    <p><b>Monthly Repayment Amount:</b></p>
+                    <p>Term (months):</p>
+                    <p>Interest Rate ("apr"):</p>
+                    <br>
+                    <p>Total amount to pay:</p>
+                    <p>Total interest to pay:</p>
+                </h4>
+            </div>
+            <div class="col-md-4">
+                <h4>
+                    <p>@preparedOffer.loanAppId</p>
+                    <p>@preparedOffer.businessName</p>
+                    <p>@java.text.NumberFormat.getCurrencyInstance.format(preparedOffer.loanValue)</p>
+                    <p><b>@java.text.NumberFormat.getCurrencyInstance.format(preparedOffer.getPmt)</b></p>
+                    <p>@preparedOffer.term</p>
+                    <p>@("%04.2f".format(preparedOffer.offerAPR *100))%</p>
+                    <br>
+                    <p>@java.text.NumberFormat.getCurrencyInstance.format(preparedOffer.totalToPay)</p>
+                    <p>@java.text.NumberFormat.getCurrencyInstance.format(preparedOffer.totalInterestToPay)</p>
+                    <br>
+                    <a href="@routes.Admin.acceptOffer(preparedOffer.loanAppId)"><button class="btn btn-info">@messages("application.accept")</button></a>
+                </h4>
+            </div>
+        </div>
+
+
+
+    </div>
+}

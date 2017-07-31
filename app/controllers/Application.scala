@@ -8,22 +8,28 @@ import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.routing.JavaScriptReverseRouter
-import services.UserDAO
+import services.{LoanApplicationDAO, UserDAO}
 
-
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by geoffreywatson on 09/02/2017.
   */
 
-class Application @Inject() (userDao:UserDAO, userForms: UserForms, authAction: AuthAction, cc:ControllerComponents)
+class Application @Inject() (userDao:UserDAO, userForms: UserForms, authAction: AuthAction,
+                             loanApplicationDAO: LoanApplicationDAO, cc:ControllerComponents)
   extends AbstractController(cc) with I18nSupport{
 
 
 
   def index = authAction.async(parse.default) { implicit request =>
-    Future.successful(Ok(views.html.index("welcome!")))
+    val user = request.session.data.get("connected").getOrElse("")
+    val futOption:Future[Option[(Long,String)]] = loanApplicationDAO.applicationStatus(user)
+    Await.result(futOption,scala.concurrent.duration.Duration(1,"seconds")) match {
+      case Some(res) => Future.successful(Ok(views.html.user.welcome(res._1,res._2,user)))
+      case None => Future.successful(Ok(views.html.index("welcome!")))
+    }
+
   }
 
   def insertUser = Action.async(parse.default) { implicit request =>

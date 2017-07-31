@@ -27,7 +27,17 @@ GET     /application                controllers.AppForm.application
 
 GET     /showapplication/:id        controllers.Admin.showApplication(id:Long)
 
-GET     /send                       controllers.Mailer.send
+GET     /prepareoffer/:id           controllers.Admin.prepareOffer(id:Long)
+
+GET     /sendofferaccept/:email/:fullname     controllers.Mailer.sendOfferAccept(email:String,fullname:String)
+
+GET     /viewoffer/:id              controllers.Admin.viewOffer(id:Long)
+
+GET     /acceptoffer/:id            controllers.Admin.acceptOffer(id:Long)
+
+GET     /disburseloan/:id           controllers.Admin.disburseLoan(id:Long)
+
+GET     /loaddata                   controllers.Admin.loadSampleData
 
 POST    /reviewapp                  controllers.Admin.insertReviewData
 

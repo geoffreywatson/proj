@@ -152,7 +152,7 @@ class AppForm @Inject()(addressDAO: AddressDAO, userDao:UserDAO, companyForms:Co
         val email = request.session.data.get("connected").getOrElse("")
         val userCoID = companyDAO.userCoID(email)
         val loanApplication = LoanApplication(0,userCoID,formData.amount,formData.term,formData.jobsCreated,
-          formData.loanPurpose,new Timestamp(System.currentTimeMillis()),None,None,None,None,None,None,None)
+          formData.loanPurpose,new Timestamp(System.currentTimeMillis()),None,None,None,None,None,None,None,"Submitted")
         loanApplicationDAO.insert(loanApplication)
         Future.successful(Redirect(routes.Application.index()))
       }

@@ -1,5 +1,6 @@
 package tasks
 
+import java.sql.Timestamp
 import javax.inject.Inject
 
 import akka.actor.ActorSystem
@@ -14,7 +15,7 @@ import scala.concurrent.duration._
 class MyActorTask @Inject() (actorSystem: ActorSystem)(implicit executionContext: ExecutionContext){
 
   actorSystem.scheduler.schedule(initialDelay = 10.seconds, interval = 1.minute){
-    print("Oops!")
+    print("Oops!- " + new Timestamp(System.currentTimeMillis()))
 
   }
 
