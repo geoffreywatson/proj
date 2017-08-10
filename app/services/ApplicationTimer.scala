@@ -21,11 +21,29 @@ import scala.concurrent.Future
  * application's [[ApplicationLifecycle]] to register a stop hook.
  */
 @Singleton
-class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecycle) {
+class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecycle, userDAO: UserDAO,
+                                  addressDAO: AddressDAO, companyDAO: CompanyDAO, loanApplicationDAO: LoanApplicationDAO,
+                                  ledgerDAO: LedgerDAO) {
 
   // This code is called when the application starts.
   private val start: Instant = clock.instant
   Logger.info(s"ApplicationTimer demo: Starting application at $start.")
+  userDAO.loadData
+  addressDAO.loadData
+  companyDAO.loadData
+  loanApplicationDAO.loadData
+  ledgerDAO.loadData
+  Thread.sleep(20000)
+  ledgerDAO.interestonFakeData
+
+  def wipeDb = {
+    ledgerDAO.delete
+    loanApplicationDAO.delete
+    userDAO.delete
+    companyDAO.delete
+    addressDAO.delete
+  }
+
 
   // When the application starts, register a stop hook with the
   // ApplicationLifecycle object. The code inside the stop hook will
@@ -34,6 +52,7 @@ class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecyc
     val stop: Instant = clock.instant
     val runningTime: Long = stop.getEpochSecond - start.getEpochSecond
     Logger.info(s"ApplicationTimer demo: Stopping application at ${clock.instant} after ${runningTime}s.")
+    //wipeDb
     Future.successful(())
   }
 }

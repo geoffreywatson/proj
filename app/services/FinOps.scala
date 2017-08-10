@@ -4,6 +4,7 @@ import java.time.temporal.{ChronoUnit, TemporalAdjusters}
 import java.time.{DayOfWeek, LocalDate}
 
 import models.AmortizationLine
+import slick.lifted.TableQuery
 
 /**
   * Created by geoffreywatson on 04/06/2017.
@@ -31,7 +32,7 @@ object FinOps {
     * @param term
     * @return
     */
-  private def getPaymentDates(specDate:LocalDate,term:Int): List[LocalDate] = {
+  def getPaymentDates(specDate:LocalDate,term:Int): List[LocalDate] = {
     def next(dates:List[LocalDate],n:Int):List[LocalDate] = n match {
       case -1 => dates.reverse
       case _ =>  val y = if(specDate.getDayOfMonth > specDate.plusMonths(term - n).lengthOfMonth()){
@@ -126,4 +127,8 @@ object FinOps {
     }
     next(lineFactory(pmtDates.head,0,PV,0,0) :: List[AmortizationLine](),pmtDates.tail)
   }
+
+
+
+
 }

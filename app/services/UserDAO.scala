@@ -4,14 +4,15 @@ import java.text.SimpleDateFormat
 
 import com.google.inject.Inject
 import models.{ContactFormData, User}
+import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.io.Source
 import scala.util.Success
-//import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by geoffreywatson on 03/02/2017.
@@ -42,21 +43,10 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider) extends Ha
 
   val users = TableQuery[UserTable]
 
-  //val insertQuery = users returning users.map(_.id) into ((user, id) => user.copy(id =id))
-
-  //def insert(email: String,pswdHash: Int,role: String): Future[User] ={
-   // val action = insertQuery += User(0,email,pswdHash,role,new Timestamp(System.currentTimeMillis()))
-   // db.run(action)
-  //}
-
-  //def insert(user:User): Future[User] ={
-    //val action = users += user
-    //db.run(action)
-  //}
-
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def findByEmail(email:String): Future[Option[User]] = db.run(users.filter(_.email===email).result.headOption)
+
   def insert(usertemplate:User): Future[Unit] = db.run(users += usertemplate).map{_ => ()}
 
   def update(email:String, userData:ContactFormData): Future[Unit] = db.run(users.filter(_.email===email)
@@ -64,9 +54,6 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider) extends Ha
     .update(Some(userData.title),Some(userData.firstName),Some(userData.middleName),
       Some(userData.lastName), Some(userData.dob), Some(userData.nin)
   )).map{_ => ()}
-
-  //def findByUsername(username:String): Future[Option[User]] = db.run((for (user <- users if user.email === username) yield user).result.headOption)
-
 
   def userExists(email:String): Future[Boolean] = db.run(users.filter(_.email===email).exists.result)
 
@@ -76,21 +63,15 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider) extends Ha
 
   def loadData = {
 
-    db.run(users.length.result) onComplete{
+    Logger.info("Loading User data...")
 
-      case Success(l) => if(l==0) {
-       println("l is 0?: " + l)
-        loadUserData
-      } else {
-        println("l was not 0: " + l)
-      }
-    }
-
+    db.run(users.length.result).map{x=>if(x==0) loadUserData}
 
     def loadUserData = {
 
       val list:Source = Source.fromFile("./public/sampledata/userdata.csv")
       val source = Source.fromFile("./public/sampledata/userdata.csv")
+      val userList = new ListBuffer[User]()
       for (line <- source.getLines().drop(1)) {
         val cols = line.split(",").map(_.trim)
         val sdf = new SimpleDateFormat("yyyy/MM/dd")
@@ -98,16 +79,15 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider) extends Ha
           Some(new java.sql.Date(sdf.parse(cols(8)).getTime)),
           Some(cols(9)),
           new java.sql.Timestamp(System.currentTimeMillis()))
-        insert(user)
+        userList += user
       }
       source.close()
+      db.run((users ++= userList).transactionally)
     }
-
-
-
-
-
-
   }
 
+  def delete:Future[Unit] ={
+    Logger.info("Deleteing User data...")
+    db.run(users.delete.transactionally).map{_=>Logger.info("Deleted User data.")}
+  }
 }

@@ -12,6 +12,7 @@ import services.{LoanApplicationDAO, UserDAO}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 /**
   * Created by geoffreywatson on 09/02/2017.
   */
@@ -25,7 +26,7 @@ class Application @Inject() (userDao:UserDAO, userForms: UserForms, authAction: 
   def index = authAction.async(parse.default) { implicit request =>
     val user = request.session.data.get("connected").getOrElse("")
     val futOption:Future[Option[(Long,String)]] = loanApplicationDAO.applicationStatus(user)
-    Await.result(futOption,scala.concurrent.duration.Duration(1,"seconds")) match {
+    Await.result(futOption,Duration(1,SECONDS)) match {
       case Some(res) => Future.successful(Ok(views.html.user.welcome(res._1,res._2,user)))
       case None => Future.successful(Ok(views.html.index("welcome!")))
     }

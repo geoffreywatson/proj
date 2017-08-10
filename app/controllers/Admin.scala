@@ -32,7 +32,6 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
     } else
     loanApplicationForms.reviewForm
 
-    println("loan id in show application" + id)
     Future.successful(Ok(views.html.admin.application(completeApplication, form)).withSession(
       request.session + ("loanID"->id.toString)))
   }
@@ -48,7 +47,6 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
           .flashing(Flash(form.data) + ("error" -> "[insertReviewData] errors in form, please correct")))
       }, reviewData => {
 
-        println("loanID in insertreview data: " + loanId)
         loanApplicationDAO.insertReviewData(loanId,ReviewData(
           new Timestamp(System.currentTimeMillis()),request.session.data.getOrElse("connected",""),reviewData.comments,
           reviewData.accepted,reviewData.offerAPR/100)
@@ -86,15 +84,15 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
     Future.successful(Redirect(routes.Admin.loanApps()))
   }
 
-  def loadSampleData = Action {
-    userDAO.loadData
-    Thread.sleep(3000)
-    addressDAO.loadData
-    Thread.sleep(3000)
-    companyDAO.loadData
-    Thread.sleep(3000)
-    loanApplicationDAO.loadData
-    Ok("did it work?")
+  def loanBook(id:Long) = authAction.async(parse.default) { implicit request =>
+    ledgerDAO.actualAmortSched(id).map { f => Ok(views.html.admin.showloan(f))
+    }
   }
+
+  def intCharge = Action {
+    ledgerDAO.sampleDataInterestCharge
+    Ok("INTEREST CHARGE CALCULATING")
+  }
+
 
 }

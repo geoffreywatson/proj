@@ -40,6 +40,11 @@ class ContactDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
 
   def insert(contact:Contact): Future[Unit] = db.run(contacts += contact).map (_ => ())
 
+  val delete = {
+    db.run(contacts.delete.transactionally)
+  }
+
+
 
 
 }

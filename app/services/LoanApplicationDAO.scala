@@ -5,14 +5,17 @@ import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 import models._
+import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future, duration}
 import scala.io.Source
-import scala.util.Success
+
 /**
   * Created by geoffreywatson on 08/04/2017.
   */
@@ -106,7 +109,7 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider)e
 
   def prepareOffer(id: Long): PreparedOffer = {
     val futOption = db.run(prepareOfferQuery(id).result.headOption)
-    Await.result(futOption, scala.concurrent.duration.Duration(1, "seconds")) match {
+    Await.result(futOption,Duration(1,SECONDS)) match {
       case Some((c, v, Some(a), t)) => PreparedOffer(id, c, v, a, t)
       case None => throw new Exception("Error cannot construct an instance of PreparedOffer with data supplied")
     }
@@ -130,7 +133,7 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider)e
   def prepareEmail(id: Long): (String, String) = {
     println("prepareEmail id: " + id)
     val futOption = db.run(prepareEmailQuery(id).result.headOption)
-    val option = Await.result(futOption, scala.concurrent.duration.Duration(1, "seconds"))
+    val option = Await.result(futOption, Duration(1,SECONDS))
     option match {
       case Some((a, Some(b), Some(c), Some(d))) =>
         println("tuple: " + a + " " + b + " " + c + " " + d)
@@ -140,7 +143,7 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider)e
   }
 
   def reviewApp(id: Long): CompleteApplication = {
-    Await.result(db.run(complexQuery(id).result.headOption), scala.concurrent.duration.Duration(1, "seconds")) match {
+    Await.result(db.run(complexQuery(id).result.headOption),Duration(1,SECONDS)) match {
       case Some(app) => CompleteApplication(app._1, app._2, app._3, app._4, app._5, app._6, app._7, app._8)
       case None => throw new IllegalArgumentException("Cannot instantiate CompleteApplication in reviewApp")
     }
@@ -171,31 +174,20 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider)e
 
   def loadData: Unit = {
 
-    println("loanapplicationDAO loaddata called...")
-
-    db.run(loanApplications.length.result) onComplete {
-      case Success(l) => if (l == 0) {
-        println("l is 0? l: " + l)
-        loadApplicationData
-      } else {
-        println("l is not 0: " + l)
-      }
-    }
+    Logger.info("Loading LoanApplication data...")
+    loadApplicationData
 
         def loadApplicationData = {
           val source = Source.fromFile("./public/sampledata/loanapplicationdata.csv")
           val sdf = new SimpleDateFormat("yyyy/MM/dd")
+          val loanApplicationList = new ListBuffer[LoanApplication]()
           for (line <- source.getLines().drop(1)) {
             val cols = line.split(",").map(_.trim)
-            println("cols: " + cols(0) + "||" + cols(1) + "||" + cols(2) + "||" + cols(3) + "||" + cols(4) + "||" + cols(5) +
-              "||" + cols(6) + "||" + cols(7) + "||" + cols(8) + "||" + cols(9) + "||" + cols(10) + "||" + cols(11) + "|||")
             val application = LoanApplication(0, cols(0).toLong, BigDecimal(cols(1)), cols(2).toInt, BigDecimal(cols(3)),
               cols(4), new java.sql.Timestamp(System.currentTimeMillis()),
               Some(new java.sql.Timestamp(System.currentTimeMillis())),
               Some(cols(5)), Some(cols(6)), Some(cols(7) == "1"),
               Some(BigDecimal(cols(8))),
-              //Some(new Timestamp(System.currentTimeMillis())),
-              //Some(new Timestamp(System.currentTimeMillis())),
               if (cols(9).length > 0) {
                 Some(new Timestamp(sdf.parse(cols(9)).getTime()))
               } else None,
@@ -203,18 +195,18 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider)e
                 Some(new Timestamp(sdf.parse(cols(10)).getTime()))
               } else None,
               cols(11))
-            insertApplication(application)
+            loanApplicationList += application
           }
           source.close()
+          db.run((loanApplications ++= loanApplicationList).transactionally)
         }
-
-
-        def insertApplication(loanApplication: LoanApplication): Unit = {
-          println("INSERTING LOANAPPLICATION..")
-          db.run(loanApplications += loanApplication).map { _ => () }
-        }
-
     }
+
+  def delete:Future[Unit] = {
+    Logger.info("Deleting loanApplication data...")
+    db.run(loanApplications.delete.transactionally).map{_=>Logger.info("Deleted loanApplication data.")}
+  }
+
 
 
 }

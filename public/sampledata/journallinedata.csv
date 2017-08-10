@@ -1,0 +1,447 @@
+je_id,a_id,amount,memo,la_id
+2,1050,-6000,drawdown -- Timothy's Ltd,1
+2,1200,6000,drawdown -- Timothy's Ltd,1
+3,1060,283.84,payment -- Timothy's Ltd,1
+3,1200,-283.84,payment -- Timothy's Ltd,1
+4,1060,283.84,payment -- Timothy's Ltd,1
+4,1200,-283.84,payment -- Timothy's Ltd,1
+5,1060,283.84,payment -- Timothy's Ltd,1
+5,1200,-283.84,payment -- Timothy's Ltd,1
+6,1060,283.84,payment -- Timothy's Ltd,1
+6,1200,-283.84,payment -- Timothy's Ltd,1
+7,1060,283.84,payment -- Timothy's Ltd,1
+7,1200,-283.84,payment -- Timothy's Ltd,1
+8,1060,283.84,payment -- Timothy's Ltd,1
+8,1200,-283.84,payment -- Timothy's Ltd,1
+9,1060,283.84,payment -- Timothy's Ltd,1
+9,1200,-283.84,payment -- Timothy's Ltd,1
+10,1060,283.84,payment -- Timothy's Ltd,1
+10,1200,-283.84,payment -- Timothy's Ltd,1
+11,1060,283.84,payment -- Timothy's Ltd,1
+11,1200,-283.84,payment -- Timothy's Ltd,1
+12,1050,-8000,drawdown -- Ali's,3
+12,1200,8000,drawdown -- Ali's,3
+13,1060,195.3,payment -- Ali's,3
+13,1200,-195.3,payment -- Ali's,3
+14,1060,195.3,payment -- Ali's,3
+14,1200,-195.3,payment -- Ali's,3
+15,1050,-5000,drawdown -- About Dance,4
+15,1200,5000,drawdown -- About Dance,4
+16,1060,125.62,payment -- About Dance,4
+16,1200,-125.62,payment -- About Dance,4
+17,1060,125.62,payment -- About Dance,4
+17,1200,-125.62,payment -- About Dance,4
+18,1050,-8000,drawdown -- AP Salvage,7
+18,1200,8000,drawdown -- AP Salvage,7
+19,1060,179.98,payment -- AP Salvage,7
+19,1200,-179.98,payment -- AP Salvage,7
+20,1060,179.98,payment -- AP Salvage,7
+20,1200,-179.98,payment -- AP Salvage,7
+21,1050,-36000,drawdown -- BUSY BEES,10
+21,1200,36000,drawdown -- BUSY BEES,10
+22,1060,6220.64,payment -- BUSY BEES,10
+22,1200,-6220.64,payment -- BUSY BEES,10
+23,1060,6220.64,payment -- BUSY BEES,10
+23,1200,-6220.64,payment -- BUSY BEES,10
+24,1060,6220.64,payment -- BUSY BEES,10
+24,1200,-6220.64,payment -- BUSY BEES,10
+25,1060,6220.64,payment -- BUSY BEES,10
+25,1200,-6220.64,payment -- BUSY BEES,10
+26,1060,6220.64,payment -- BUSY BEES,10
+26,1200,-6220.64,payment -- BUSY BEES,10
+27,1060,6220.64,payment -- BUSY BEES,10
+27,1200,-6220.64,payment -- BUSY BEES,10
+28,1050,-6000,drawdown -- Clink,11
+28,1200,6000,drawdown -- Clink,11
+29,1060,134.99,payment -- Clink,11
+29,1200,-134.99,payment -- Clink,11
+30,1060,134.99,payment -- Clink,11
+30,1200,-134.99,payment -- Clink,11
+31,1060,134.99,payment -- Clink,11
+31,1200,-134.99,payment -- Clink,11
+32,1060,134.99,payment -- Clink,11
+32,1200,-134.99,payment -- Clink,11
+33,1060,134.99,payment -- Clink,11
+33,1200,-134.99,payment -- Clink,11
+34,1060,134.99,payment -- Clink,11
+34,1200,-134.99,payment -- Clink,11
+35,1060,134.99,payment -- Clink,11
+35,1200,-134.99,payment -- Clink,11
+36,1060,134.99,payment -- Clink,11
+36,1200,-134.99,payment -- Clink,11
+37,1060,134.99,payment -- Clink,11
+37,1200,-134.99,payment -- Clink,11
+38,1060,134.99,payment -- Clink,11
+38,1200,-134.99,payment -- Clink,11
+39,1060,134.99,payment -- Clink,11
+39,1200,-134.99,payment -- Clink,11
+40,1060,134.99,payment -- Clink,11
+40,1200,-134.99,payment -- Clink,11
+41,1060,134.99,payment -- Clink,11
+41,1200,-134.99,payment -- Clink,11
+42,1060,134.99,payment -- Clink,11
+42,1200,-134.99,payment -- Clink,11
+43,1060,134.99,payment -- Clink,11
+43,1200,-134.99,payment -- Clink,11
+44,1060,134.99,payment -- Clink,11
+44,1200,-134.99,payment -- Clink,11
+45,1060,134.99,payment -- Clink,11
+45,1200,-134.99,payment -- Clink,11
+46,1060,134.99,payment -- Clink,11
+46,1200,-134.99,payment -- Clink,11
+47,1050,-18000,drawdown -- Samuel Y Culling Ltd,17
+47,1200,18000,drawdown -- Samuel Y Culling Ltd,17
+48,1060,1101.86,payment -- Samuel Y Culling Ltd,17
+48,1200,-1101.86,payment -- Samuel Y Culling Ltd,17
+49,1060,1101.86,payment -- Samuel Y Culling Ltd,17
+49,1200,-1101.86,payment -- Samuel Y Culling Ltd,17
+50,1060,1101.86,payment -- Samuel Y Culling Ltd,17
+50,1200,-1101.86,payment -- Samuel Y Culling Ltd,17
+51,1060,1101.86,payment -- Samuel Y Culling Ltd,17
+51,1200,-1101.86,payment -- Samuel Y Culling Ltd,17
+52,1060,1101.86,payment -- Samuel Y Culling Ltd,17
+52,1200,-1101.86,payment -- Samuel Y Culling Ltd,17
+53,1050,-39000,drawdown -- Swinbrook LLP,24
+53,1200,39000,drawdown -- Swinbrook LLP,24
+54,1060,753.98,payment -- Swinbrook LLP,24
+54,1200,-753.98,payment -- Swinbrook LLP,24
+55,1060,753.98,payment -- Swinbrook LLP,24
+55,1200,-753.98,payment -- Swinbrook LLP,24
+56,1060,753.98,payment -- Swinbrook LLP,24
+56,1200,-753.98,payment -- Swinbrook LLP,24
+57,1060,753.98,payment -- Swinbrook LLP,24
+57,1200,-753.98,payment -- Swinbrook LLP,24
+58,1060,753.98,payment -- Swinbrook LLP,24
+58,1200,-753.98,payment -- Swinbrook LLP,24
+59,1060,753.98,payment -- Swinbrook LLP,24
+59,1200,-753.98,payment -- Swinbrook LLP,24
+60,1060,753.98,payment -- Swinbrook LLP,24
+60,1200,-753.98,payment -- Swinbrook LLP,24
+61,1060,753.98,payment -- Swinbrook LLP,24
+61,1200,-753.98,payment -- Swinbrook LLP,24
+62,1060,753.98,payment -- Swinbrook LLP,24
+62,1200,-753.98,payment -- Swinbrook LLP,24
+63,1060,753.98,payment -- Swinbrook LLP,24
+63,1200,-753.98,payment -- Swinbrook LLP,24
+64,1060,753.98,payment -- Swinbrook LLP,24
+64,1200,-753.98,payment -- Swinbrook LLP,24
+65,1060,753.98,payment -- Swinbrook LLP,24
+65,1200,-753.98,payment -- Swinbrook LLP,24
+66,1050,-21000,drawdown -- Quizzos,27
+66,1200,21000,drawdown -- Quizzos,27
+67,1060,969.04,payment -- Quizzos,27
+67,1200,-969.04,payment -- Quizzos,27
+68,1060,969.04,payment -- Quizzos,27
+68,1200,-969.04,payment -- Quizzos,27
+69,1060,969.04,payment -- Quizzos,27
+69,1200,-969.04,payment -- Quizzos,27
+70,1060,969.04,payment -- Quizzos,27
+70,1200,-969.04,payment -- Quizzos,27
+71,1060,969.04,payment -- Quizzos,27
+71,1200,-969.04,payment -- Quizzos,27
+72,1060,969.04,payment -- Quizzos,27
+72,1200,-969.04,payment -- Quizzos,27
+73,1060,969.04,payment -- Quizzos,27
+73,1200,-969.04,payment -- Quizzos,27
+74,1060,969.04,payment -- Quizzos,27
+74,1200,-969.04,payment -- Quizzos,27
+75,1060,969.04,payment -- Quizzos,27
+75,1200,-969.04,payment -- Quizzos,27
+76,1060,969.04,payment -- Quizzos,27
+76,1200,-969.04,payment -- Quizzos,27
+77,1060,969.04,payment -- Quizzos,27
+77,1200,-969.04,payment -- Quizzos,27
+78,1060,969.04,payment -- Quizzos,27
+78,1200,-969.04,payment -- Quizzos,27
+79,1050,-52000,drawdown -- More Muffins Please,30
+79,1200,52000,drawdown -- More Muffins Please,30
+80,1060,1117.68,payment -- More Muffins Please,30
+80,1200,-1117.68,payment -- More Muffins Please,30
+81,1060,1117.68,payment -- More Muffins Please,30
+81,1200,-1117.68,payment -- More Muffins Please,30
+82,1060,1117.68,payment -- More Muffins Please,30
+82,1200,-1117.68,payment -- More Muffins Please,30
+83,1060,1117.68,payment -- More Muffins Please,30
+83,1200,-1117.68,payment -- More Muffins Please,30
+84,1060,1117.68,payment -- More Muffins Please,30
+84,1200,-1117.68,payment -- More Muffins Please,30
+85,1060,1117.68,payment -- More Muffins Please,30
+85,1200,-1117.68,payment -- More Muffins Please,30
+86,1060,1117.68,payment -- More Muffins Please,30
+86,1200,-1117.68,payment -- More Muffins Please,30
+87,1060,1117.68,payment -- More Muffins Please,30
+87,1200,-1117.68,payment -- More Muffins Please,30
+88,1060,1117.68,payment -- More Muffins Please,30
+88,1200,-1117.68,payment -- More Muffins Please,30
+89,1060,1117.68,payment -- More Muffins Please,30
+89,1200,-1117.68,payment -- More Muffins Please,30
+90,1060,1117.68,payment -- More Muffins Please,30
+90,1200,-1117.68,payment -- More Muffins Please,30
+91,1060,1117.68,payment -- More Muffins Please,30
+91,1200,-1117.68,payment -- More Muffins Please,30
+92,1060,1117.68,payment -- More Muffins Please,30
+92,1200,-1117.68,payment -- More Muffins Please,30
+93,1060,1117.68,payment -- More Muffins Please,30
+93,1200,-1117.68,payment -- More Muffins Please,30
+94,1060,1117.68,payment -- More Muffins Please,30
+94,1200,-1117.68,payment -- More Muffins Please,30
+95,1060,1117.68,payment -- More Muffins Please,30
+95,1200,-1117.68,payment -- More Muffins Please,30
+96,1050,-3000,drawdown -- Flower of Life Ltd,32
+96,1200,3000,drawdown -- Flower of Life Ltd,32
+97,1060,135.68,payment -- Flower of Life Ltd,32
+97,1200,-135.68,payment -- Flower of Life Ltd,32
+98,1060,135.68,payment -- Flower of Life Ltd,32
+98,1200,-135.68,payment -- Flower of Life Ltd,32
+99,1060,135.68,payment -- Flower of Life Ltd,32
+99,1200,-135.68,payment -- Flower of Life Ltd,32
+100,1060,135.68,payment -- Flower of Life Ltd,32
+100,1200,-135.68,payment -- Flower of Life Ltd,32
+101,1060,135.68,payment -- Flower of Life Ltd,32
+101,1200,-135.68,payment -- Flower of Life Ltd,32
+102,1060,135.68,payment -- Flower of Life Ltd,32
+102,1200,-135.68,payment -- Flower of Life Ltd,32
+103,1060,135.68,payment -- Flower of Life Ltd,32
+103,1200,-135.68,payment -- Flower of Life Ltd,32
+104,1060,135.68,payment -- Flower of Life Ltd,32
+104,1200,-135.68,payment -- Flower of Life Ltd,32
+105,1060,135.68,payment -- Flower of Life Ltd,32
+105,1200,-135.68,payment -- Flower of Life Ltd,32
+106,1050,-32000,drawdown -- Fornetti,33
+106,1200,32000,drawdown -- Fornetti,33
+107,1060,2798.45,payment -- Fornetti,33
+107,1200,-2798.45,payment -- Fornetti,33
+108,1060,2798.45,payment -- Fornetti,33
+108,1200,-2798.45,payment -- Fornetti,33
+109,1060,2798.45,payment -- Fornetti,33
+109,1200,-2798.45,payment -- Fornetti,33
+110,1060,2798.45,payment -- Fornetti,33
+110,1200,-2798.45,payment -- Fornetti,33
+111,1050,-38000,drawdown -- Grasshopper Maintenance,36
+111,1200,38000,drawdown -- Grasshopper Maintenance,36
+112,1060,2326.15,payment -- Grasshopper Maintenance,36
+112,1200,-2326.15,payment -- Grasshopper Maintenance,36
+113,1060,2326.15,payment -- Grasshopper Maintenance,36
+113,1200,-2326.15,payment -- Grasshopper Maintenance,36
+114,1060,2326.15,payment -- Grasshopper Maintenance,36
+114,1200,-2326.15,payment -- Grasshopper Maintenance,36
+115,1060,2326.15,payment -- Grasshopper Maintenance,36
+115,1200,-2326.15,payment -- Grasshopper Maintenance,36
+116,1060,2326.15,payment -- Grasshopper Maintenance,36
+116,1200,-2326.15,payment -- Grasshopper Maintenance,36
+117,1060,2326.15,payment -- Grasshopper Maintenance,36
+117,1200,-2326.15,payment -- Grasshopper Maintenance,36
+118,1060,2326.15,payment -- Grasshopper Maintenance,36
+118,1200,-2326.15,payment -- Grasshopper Maintenance,36
+119,1060,2326.15,payment -- Grasshopper Maintenance,36
+119,1200,-2326.15,payment -- Grasshopper Maintenance,36
+120,1060,2326.15,payment -- Grasshopper Maintenance,36
+120,1200,-2326.15,payment -- Grasshopper Maintenance,36
+121,1060,2326.15,payment -- Grasshopper Maintenance,36
+121,1200,-2326.15,payment -- Grasshopper Maintenance,36
+122,1050,-10000,drawdown -- Hair & Beauty Supplies,37
+122,1200,10000,drawdown -- Hair & Beauty Supplies,37
+123,1060,214.94,payment -- Hair & Beauty Supplies,37
+123,1200,-214.94,payment -- Hair & Beauty Supplies,37
+124,1060,214.94,payment -- Hair & Beauty Supplies,37
+124,1200,-214.94,payment -- Hair & Beauty Supplies,37
+125,1060,214.94,payment -- Hair & Beauty Supplies,37
+125,1200,-214.94,payment -- Hair & Beauty Supplies,37
+126,1050,-95000,drawdown -- Harris Plumbing,38
+126,1200,95000,drawdown -- Harris Plumbing,38
+127,1050,-14000,drawdown -- Henley's,39
+127,1200,14000,drawdown -- Henley's,39
+128,1050,-41000,drawdown -- La Palma,41
+128,1200,41000,drawdown -- La Palma,41
+129,1060,3604.55,payment -- La Palma,41
+129,1200,-3604.55,payment -- La Palma,41
+130,1060,3604.55,payment -- La Palma,41
+130,1200,-3604.55,payment -- La Palma,41
+131,1060,3604.55,payment -- La Palma,41
+131,1200,-3604.55,payment -- La Palma,41
+132,1060,3604.55,payment -- La Palma,41
+132,1200,-3604.55,payment -- La Palma,41
+133,1060,3604.55,payment -- La Palma,41
+133,1200,-3604.55,payment -- La Palma,41
+134,1060,3604.55,payment -- La Palma,41
+134,1200,-3604.55,payment -- La Palma,41
+135,1060,3604.55,payment -- La Palma,41
+135,1200,-3604.55,payment -- La Palma,41
+136,1060,3604.55,payment -- La Palma,41
+136,1200,-3604.55,payment -- La Palma,41
+137,1060,3604.55,payment -- La Palma,41
+137,1200,-3604.55,payment -- La Palma,41
+138,1060,3604.55,payment -- La Palma,41
+138,1200,-3604.55,payment -- La Palma,41
+139,1060,3604.55,payment -- La Palma,41
+139,1200,-3604.55,payment -- La Palma,41
+140,1060,3604.55,payment -- La Palma,41
+140,1200,-3604.55,payment -- La Palma,41
+141,1050,-7000,drawdown -- Let's Create,42
+141,1200,7000,drawdown -- Let's Create,42
+142,1060,180.92,payment -- Let's Create,42
+142,1200,-180.92,payment -- Let's Create,42
+143,1060,180.92,payment -- Let's Create,42
+143,1200,-180.92,payment -- Let's Create,42
+144,1060,180.92,payment -- Let's Create,42
+144,1200,-180.92,payment -- Let's Create,42
+145,1060,180.92,payment -- Let's Create,42
+145,1200,-180.92,payment -- Let's Create,42
+146,1050,-9000,drawdown -- Light House,43
+146,1200,9000,drawdown -- Light House,43
+147,1060,202.48,payment -- Light House,43
+147,1200,-202.48,payment -- Light House,43
+148,1060,202.48,payment -- Light House,43
+148,1200,-202.48,payment -- Light House,43
+149,1060,202.48,payment -- Light House,43
+149,1200,-202.48,payment -- Light House,43
+150,1060,202.48,payment -- Light House,43
+150,1200,-202.48,payment -- Light House,43
+151,1060,202.48,payment -- Light House,43
+151,1200,-202.48,payment -- Light House,43
+152,1060,202.48,payment -- Light House,43
+152,1200,-202.48,payment -- Light House,43
+153,1060,202.48,payment -- Light House,43
+153,1200,-202.48,payment -- Light House,43
+154,1060,202.48,payment -- Light House,43
+154,1200,-202.48,payment -- Light House,43
+155,1060,202.48,payment -- Light House,43
+155,1200,-202.48,payment -- Light House,43
+156,1060,202.48,payment -- Light House,43
+156,1200,-202.48,payment -- Light House,43
+157,1060,202.48,payment -- Light House,43
+157,1200,-202.48,payment -- Light House,43
+158,1060,202.48,payment -- Light House,43
+158,1200,-202.48,payment -- Light House,43
+159,1060,202.48,payment -- Light House,43
+159,1200,-202.48,payment -- Light House,43
+160,1060,202.48,payment -- Light House,43
+160,1200,-202.48,payment -- Light House,43
+161,1060,202.48,payment -- Light House,43
+161,1200,-202.48,payment -- Light House,43
+162,1060,202.48,payment -- Light House,43
+162,1200,-202.48,payment -- Light House,43
+163,1060,202.48,payment -- Light House,43
+163,1200,-202.48,payment -- Light House,43
+164,1060,202.48,payment -- Light House,43
+164,1200,-202.48,payment -- Light House,43
+165,1060,202.48,payment -- Light House,43
+165,1200,-202.48,payment -- Light House,43
+166,1050,-7000,drawdown -- Mishri Foods Ltd,46
+166,1200,7000,drawdown -- Mishri Foods Ltd,46
+167,1060,316.59,payment -- Mishri Foods Ltd,46
+167,1200,-316.59,payment -- Mishri Foods Ltd,46
+168,1060,316.59,payment -- Mishri Foods Ltd,46
+168,1200,-316.59,payment -- Mishri Foods Ltd,46
+169,1060,316.59,payment -- Mishri Foods Ltd,46
+169,1200,-316.59,payment -- Mishri Foods Ltd,46
+170,1060,316.59,payment -- Mishri Foods Ltd,46
+170,1200,-316.59,payment -- Mishri Foods Ltd,46
+171,1050,-48000,drawdown -- NC NEWS,47
+171,1200,48000,drawdown -- NC NEWS,47
+172,1050,-8000,drawdown -- Vape Cafe,53
+172,1200,8000,drawdown -- Vape Cafe,53
+173,1060,295.27,payment -- Vape Cafe,53
+173,1200,-295.27,payment -- Vape Cafe,53
+174,1060,295.27,payment -- Vape Cafe,53
+174,1200,-295.27,payment -- Vape Cafe,53
+175,1060,295.27,payment -- Vape Cafe,53
+175,1200,-295.27,payment -- Vape Cafe,53
+176,1060,295.27,payment -- Vape Cafe,53
+176,1200,-295.27,payment -- Vape Cafe,53
+177,1060,295.27,payment -- Vape Cafe,53
+177,1200,-295.27,payment -- Vape Cafe,53
+178,1060,295.27,payment -- Vape Cafe,53
+178,1200,-295.27,payment -- Vape Cafe,53
+179,1060,295.27,payment -- Vape Cafe,53
+179,1200,-295.27,payment -- Vape Cafe,53
+180,1060,295.27,payment -- Vape Cafe,53
+180,1200,-295.27,payment -- Vape Cafe,53
+181,1060,295.27,payment -- Vape Cafe,53
+181,1200,-295.27,payment -- Vape Cafe,53
+182,1050,-58000,drawdown -- Tony Pickering Contractor,55
+182,1200,58000,drawdown -- Tony Pickering Contractor,55
+183,1060,3523.5,payment -- Tony Pickering Contractor,55
+183,1200,-3523.5,payment -- Tony Pickering Contractor,55
+184,1060,3523.5,payment -- Tony Pickering Contractor,55
+184,1200,-3523.5,payment -- Tony Pickering Contractor,55
+185,1060,3523.5,payment -- Tony Pickering Contractor,55
+185,1200,-3523.5,payment -- Tony Pickering Contractor,55
+186,1060,3523.5,payment -- Tony Pickering Contractor,55
+186,1200,-3523.5,payment -- Tony Pickering Contractor,55
+187,1060,3523.5,payment -- Tony Pickering Contractor,55
+187,1200,-3523.5,payment -- Tony Pickering Contractor,55
+188,1060,3523.5,payment -- Tony Pickering Contractor,55
+188,1200,-3523.5,payment -- Tony Pickering Contractor,55
+189,1060,5000,payment -- Tony Pickering Contractor,55
+189,1200,-5000,payment -- Tony Pickering Contractor,55
+190,1050,-73000,drawdown -- Lemon & Lime,58
+190,1200,73000,drawdown -- Lemon & Lime,58
+191,1060,2163.49,payment -- Lemon & Lime,58
+191,1200,-2163.49,payment -- Lemon & Lime,58
+192,1060,2163.49,payment -- Lemon & Lime,58
+192,1200,-2163.49,payment -- Lemon & Lime,58
+193,1060,2163.49,payment -- Lemon & Lime,58
+193,1200,-2163.49,payment -- Lemon & Lime,58
+194,1060,2163.49,payment -- Lemon & Lime,58
+194,1200,-2163.49,payment -- Lemon & Lime,58
+195,1060,2163.49,payment -- Lemon & Lime,58
+195,1200,-2163.49,payment -- Lemon & Lime,58
+196,1050,-67000,drawdown -- Accilla,59
+196,1200,67000,drawdown -- Accilla,59
+197,1060,3393.68,payment -- Accilla,59
+197,1200,-3393.68,payment -- Accilla,59
+198,1060,3393.68,payment -- Accilla,59
+198,1200,-3393.68,payment -- Accilla,59
+199,1060,3393.68,payment -- Accilla,59
+199,1200,-3393.68,payment -- Accilla,59
+200,1060,3393.68,payment -- Accilla,59
+200,1200,-3393.68,payment -- Accilla,59
+201,1060,3393.68,payment -- Accilla,59
+201,1200,-3393.68,payment -- Accilla,59
+202,1060,3393.68,payment -- Accilla,59
+202,1200,-3393.68,payment -- Accilla,59
+203,1060,3393.68,payment -- Accilla,59
+203,1200,-3393.68,payment -- Accilla,59
+204,1060,3393.68,payment -- Accilla,59
+204,1200,-3393.68,payment -- Accilla,59
+205,1060,3393.68,payment -- Accilla,59
+205,1200,-3393.68,payment -- Accilla,59
+206,1060,3393.68,payment -- Accilla,59
+206,1200,-3393.68,payment -- Accilla,59
+207,1060,3393.68,payment -- Accilla,59
+207,1200,-3393.68,payment -- Accilla,59
+208,1060,3393.68,payment -- Accilla,59
+208,1200,-3393.68,payment -- Accilla,59
+209,1050,-5000,drawdown -- Winterborn Grass,60
+209,1200,5000,drawdown -- Winterborn Grass,60
+210,1060,452.47,payment -- Winterborn Grass,60
+210,1200,-452.47,payment -- Winterborn Grass,60
+211,1060,452.47,payment -- Winterborn Grass,60
+211,1200,-452.47,payment -- Winterborn Grass,60
+212,1060,452.47,payment -- Winterborn Grass,60
+212,1200,-452.47,payment -- Winterborn Grass,60
+213,1060,452.47,payment -- Winterborn Grass,60
+213,1200,-452.47,payment -- Winterborn Grass,60
+214,1060,452.47,payment -- Winterborn Grass,60
+214,1200,-452.47,payment -- Winterborn Grass,60
+215,1060,452.47,payment -- Winterborn Grass,60
+215,1200,-452.47,payment -- Winterborn Grass,60
+216,1060,452.47,payment -- Winterborn Grass,60
+216,1200,-452.47,payment -- Winterborn Grass,60
+217,1060,452.47,payment -- Winterborn Grass,60
+217,1200,-452.47,payment -- Winterborn Grass,60
+218,1050,-5000,drawdown -- Makeover,61
+218,1200,5000,drawdown -- Makeover,61
+219,1060,234.2,payment -- Makeover,61
+219,1200,-234.2,payment -- Makeover,61
+220,1060,234.2,payment -- Makeover,61
+220,1200,-234.2,payment -- Makeover,61
+221,1060,234.2,payment -- Makeover,61
+221,1200,-234.2,payment -- Makeover,61
+222,1060,234.2,payment -- Makeover,61
+222,1200,-234.2,payment -- Makeover,61
+223,1060,234.2,payment -- Makeover,61
+223,1200,-234.2,payment -- Makeover,61
+224,1060,234.2,payment -- Makeover,61
+224,1200,-234.2,payment -- Makeover,61

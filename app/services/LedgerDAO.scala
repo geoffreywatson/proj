@@ -1,17 +1,24 @@
 package services
 
 import java.sql.{Date, Timestamp}
+import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import javax.inject.{Inject, Singleton}
 
-import com.sun.javafx.logging.Logger
+import com.mysql.jdbc.PacketTooBigException
+import play.api.Logger._
 import models._
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.model.Column
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.io.Source
 import scala.util.{Failure, Success}
+import scala.concurrent.duration._
 
 
 /**
@@ -32,6 +39,7 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
     def id = column[Int]("ID", O.PrimaryKey)
     def name = column[String]("NAME")
     def group = column[String]("AC_GROUP")
+
     def * = (id, name, group) <> (Account.tupled, Account.unapply)
   }
 
@@ -41,7 +49,7 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
 
   def accountIdExists(id: Int): Boolean = {
     val query = accounts.filter(_.id === id).exists.result
-    Await.result(db.run(query), scala.concurrent.duration.Duration(1, "seconds"))
+    Await.result(db.run(query), Duration(1, SECONDS))
   }
 
   def insertAccount(account: Account): Unit = {
@@ -57,7 +65,7 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
     def id = column[Long]("ID", O.PrimaryKey)
     def jeId = column[Long]("JE_ID")
     def aId = column[Int]("A_ID")
-    def amount = column[BigDecimal]("AMOUNT")
+    def amount = column[BigDecimal]("AMOUNT",O.SqlType("decimal(10,2)"))
     def memo = column[Option[String]]("MEMO")
     def laId = column[Option[Long]]("LA_ID")
     def je = foreignKey("je_fk", jeId, journalLines)(_.id)
@@ -67,19 +75,20 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
   }
 
 
-
   class JournalEntryTable(tag: Tag) extends Table[JournalEntry](tag, "JOURNAL_ENTRY") {
 
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
     def created = column[java.sql.Timestamp]("CREATED")
     def entryDate = column[java.sql.Date]("ENTRY_DATE")
-    def * = (id, created, entryDate) <> (JournalEntry.tupled, JournalEntry.unapply)
 
+    def * = (id, created, entryDate) <> (JournalEntry.tupled, JournalEntry.unapply)
   }
 
   val journalLines = TableQuery[JournalLineTable]
   val journalEntries = TableQuery[JournalEntryTable]
   val loanApplications = TableQuery[LoanApplicationTable]
+
+
 
 
 
@@ -93,46 +102,45 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
   def insertJournalEntry(je: CompleteJournalEntry): Unit = {
     val action = insertJeQuery += JournalEntry(0, new Timestamp(System.currentTimeMillis()), Date.valueOf(je.entryDate))
     val futJe = db.run(action)
-    val id = Await.result(futJe, scala.concurrent.duration.Duration(1, "seconds")).id
+    val id = Await.result(futJe, Duration(1, SECONDS)).id
     for (l <- je.journalEntryLines) {
       db.run(journalLines += JournalLine(0, id, l.accId, l.amount, l.memo, l.laId)).map(_ => ())
     }
   }
 
 
-  def getCompanyName(lId:Long):String = {
-    def query(id:Long) = for {
+  def getCompanyName(lId: Long): String = {
+    def query(id: Long) = for {
       ((l, uc), c) <- (loanApplications.filter(_.id === id) join userComps on (_.userCoID === _.id)
         join companies on (_._2.cid === _.id))
     } yield (c.name)
-    val fut:Future[Option[String]] = db.run(query(lId).result.headOption)
-    Await.result(fut,scala.concurrent.duration.Duration(1,"seconds")) match {
-      case Some(s) =>
-        println("company name in get co name: " + s)
-        s
+
+    val fut: Future[Option[String]] = db.run(query(lId).result.headOption)
+    Await.result(fut, Duration(1, SECONDS)) match {
+      case Some(coName) => coName
       case None => ""
     }
   }
 
   val insertJeQuery = journalEntries returning journalEntries.map(_.id) into ((je, id) => je.copy(id = id))
 
-  def insertJournalEntry(entryDate:LocalDate,drAcc:Int,crAcc:Int,amount:BigDecimal,memo:Option[String],lId:Option[Long]): Unit ={
-    val memo2:String = lId match {
+  def insertJournalEntry(entryDate: LocalDate, drAcc: Int, crAcc: Int, amount: BigDecimal, memo: Option[String], lId: Option[Long]): Unit = {
+    val memo2: String = lId match {
       case Some(id) => getCompanyName(id)
       case None => ""
     }
-    val memo1:String = memo match {
+    val memo1: String = memo match {
       case Some(m) => m + " -- " + memo2
       case None => ""
     }
     val je = CompleteJournalEntry(entryDate,
-      JournalLine(0,0,drAcc,amount,Some(memo1),lId) ::
-      JournalLine(0,0,crAcc,-amount,Some(memo1),lId) :: Nil
+      JournalLine(0, 0, drAcc, amount, Some(memo1), lId) ::
+        JournalLine(0, 0, crAcc, -amount, Some(memo1), lId) :: Nil
     )
-    val action = insertJeQuery += JournalEntry(0,new Timestamp(System.currentTimeMillis()), Date.valueOf(entryDate))
+    val action = insertJeQuery += JournalEntry(0, new Timestamp(System.currentTimeMillis()), Date.valueOf(entryDate))
     db.run(action) onComplete {
-      case Success(jeId) => for(l <- je.journalEntryLines){
-        db.run(journalLines += JournalLine(0,jeId.id,l.accId,l.amount,l.memo,l.laId))
+      case Success(jeId) => for (l <- je.journalEntryLines) {
+        db.run(journalLines += JournalLine(0, jeId.id, l.accId, l.amount, l.memo, l.laId))
       }
     }
   }
@@ -145,63 +153,400 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
     */
   def disburseLoan(loanId: Long): Unit = {
     val entryDate = FinOps.setDrawdownDate(LocalDate.now)
-    db.run(loanApplications.filter(_.id===loanId).map(_.amount).result.headOption) onComplete{
-      case Success(amount) => insertJournalEntry(entryDate,1200,1050,amount match {
-        case Some(x) => x
-      },Some("drawdown"),Some(loanId))
-        accrueInterest(loanId,entryDate)
-        loanApplicationDAO.updateStatus(loanId,"Drawndown")
+    db.run(loanApplications.filter(_.id === loanId).map(x => (x.amount, x.offerAPR)).result.headOption).map { i =>
+      i match {
+        case Some(p) => insertJournalEntry(entryDate, 1200, 1050, p._1, Some("drawdown"), Some(loanId))
+          accrueInterest(loanId, entryDate, p._2 match {
+            case Some(r) => r
+          })
+          loanApplicationDAO.updateStatus(loanId, "Drawndown")
+      }
     }
   }
 
+  def loanBalance(id: Long, date: LocalDate): BigDecimal = {
 
-
-  def loanBalance(id:Long,date:LocalDate): BigDecimal = {
-
-    def query(id:Long,date:LocalDate) = for {
-      ((jl),je) <- (journalLines.filter(c => c.aId === 1200 && c.laId === id)
-        join journalEntries.filter(_.entryDate <= Date.valueOf(date)) on (_.jeId===_.id))
+    def query(id: Long, date: LocalDate) = for {
+      ((jl), je) <- (journalLines.filter(c => c.aId === 1200 && c.laId === id)
+        join journalEntries.filter(_.entryDate <= Date.valueOf(date)) on (_.jeId === _.id))
     } yield (jl.amount)
 
-    val a:Future[Seq[BigDecimal]] = db.run(query(id,date).result)
+    val a: Future[Seq[BigDecimal]] = db.run(query(id, date).result)
     a onComplete {
-      case Success(v) => (BigDecimal(0) /: v)(_ + _)
+      case Success(v) => (BigDecimal(0) /: v) (_ + _)
       case Failure(t) => println("an error occured" + t)
     }
     ???
   }
 
 
+  /**
+    *
+    * @param id
+    * @param entryDate
+    */
 
+  def accrueInterest(id: Long, entryDate: LocalDate, apr:BigDecimal) = {
 
-
-
-  def accrueInterest(id:Long,entryDate:LocalDate)  = {
-    def query(id:Long,date:LocalDate) = for {
-      ((jl),je) <- (journalLines.filter(c => c.aId === 1200 && c.laId === id)
-        join journalEntries.filter(_.entryDate <= Date.valueOf(date)) on (_.jeId===_.id))
+    def query(id:Long, date:LocalDate) = for {
+      ((jl), je) <- (journalLines.filter(c => c.aId === 1200 && c.laId === id)
+        join journalEntries.filter(_.entryDate <= Date.valueOf(date)) on (_.jeId === _.id))
     } yield (jl.amount)
 
-    val a:Future[Seq[BigDecimal]] = db.run(query(id,entryDate).result)
-    a onComplete {
-      case Success(v) => {
-        val loanBalance = (BigDecimal(0) /: v)(_ + _)
-        val apr = db.run(loanApplications.filter(_.id===id).map(_.offerAPR).result.headOption) onComplete {
-          case Success(Some(r)) => r match {
-            case Some(apr) => insertJournalEntry(entryDate,1600,4000,apr/365 * loanBalance,Some("interest accrual"),Some(id))
-            case None => throw new Exception("error")
-          }
-          case Failure(t) => println("error: " + t)
-        }
-      }
-      case Failure(t) => println("an error occured" + t)
+   db.run(query(id, entryDate).result).map{ x =>
+     val loanBal = (BigDecimal(0) /: x) (_+_)
+     if(loanBal > 0) insertJournalEntry(entryDate,1600,4000,apr/365 * loanBal,Some("interest accrual"), Some(id))
+   }
+  }
+
+
+  def actualAmortSched(id:Long):Future[List[AmortizationLine]]= {
+    val query = (for {
+      (jl, je) <- (journalLines.filter(x => x.laId === id && x.aId === 1200)
+        join journalEntries on (_.jeId === _.id))
+    } yield (jl, je)).sortBy(_._2.entryDate.asc)
+    db.run(query.result).map { jLines => dailySchedule(jLines)
     }
   }
+
+  private def dailySchedule(seq:Seq[(JournalLine,JournalEntry)]):List[AmortizationLine] = {
+    val lc = toLineConstructor(seq)
+    def next(remain:List[LineConstructor],sched:List[AmortizationLine]):List[AmortizationLine] = {
+      ChronoUnit.DAYS.between(sched.head.date,LocalDate.now) match {
+        case 0 => sched.reverse
+        case _ => ChronoUnit.DAYS.between(sched.head.date,remain.head.date) match {
+          case 1 =>
+            val hd = remain.head
+            val ebal = sched.head.ebal + hd.draw + hd.int + hd.pmt
+            next(remain.tail,AmortizationLine(hd.date,sched.head.ebal,hd.draw,hd.int,hd.pmt,ebal)::sched)
+          case _ =>
+            val hd = sched.head
+            next(remain,AmortizationLine(hd.date.plusDays(1),hd.ebal,0,0,0,hd.ebal)::sched)
+        }
+      }
+    }
+    next(lc.tail,AmortizationLine(lc.head.date,0,lc.head.draw,lc.head.int,lc.head.pmt,lc.head.draw)
+      ::List[AmortizationLine]())
+  }
+
+  /**
+    * Consolidate lines with the same date to form a new list
+    * @param lines
+    * @return
+    */
+  private def flattenLines(lines:List[LineConstructor]):List[LineConstructor] = {
+    def next(remain:List[LineConstructor],sched:List[LineConstructor]):List[LineConstructor]= remain match {
+      case Nil => sched
+      case hd :: tl => ChronoUnit.DAYS.between(sched.head.date,hd.date) match {
+        case 0 => next(remain.tail,LineConstructor(sched.head.date,sched.head.draw + hd.draw,
+          sched.head.int + hd.int, sched.head.pmt + hd.pmt) :: sched.tail)
+        case _ => next(remain.tail,LineConstructor(hd.date,hd.draw,hd.int,hd.pmt)::sched)
+      }
+    }
+    next(lines.tail,LineConstructor(lines.head.date,lines.head.draw,lines.head.int,lines.head.pmt)::List[LineConstructor]())
+  }
+
+  private case class LineConstructor(date:LocalDate,draw:BigDecimal,int:BigDecimal,pmt:BigDecimal)
+
+  /**
+    * convert a tuple of JournalLine and JournalEntry into a LineConstructor. A LineConstructor is an intermediate case class
+    * used to prepare the actual Amortization Schedule of a Loan.
+    * @param line
+    * @return
+    */
+  private def toLineConstructor(line:(JournalLine,JournalEntry)):LineConstructor={
+    val amount = line._1.amount
+    val alloc:Tuple3[BigDecimal,BigDecimal,BigDecimal] = line._1.memo match {
+      case Some(s) => s match {
+        case msg if msg.startsWith("drawdown") => (amount,BigDecimal(0),BigDecimal(0))
+        case msg if msg.startsWith("interest") => (BigDecimal(0),amount,BigDecimal(0))
+        case msg if msg.startsWith("payment") => (BigDecimal(0),BigDecimal(0),amount)
+        case _ => throw new IllegalArgumentException("no match on line memo")
+      }
+      case None => throw new IllegalArgumentException("Could not match account id")
+    }
+    LineConstructor(line._2.entryDate.toLocalDate,alloc._1,alloc._2,alloc._3)
+  }
+
+  private def toLineConstructor(lines:Seq[(JournalLine,JournalEntry)]):List[LineConstructor]={
+
+    def next(remain:List[(JournalLine,JournalEntry)],sched:List[LineConstructor]):List[LineConstructor]= {
+        remain match {
+          case Nil => flattenLines(sched)
+          case hd :: tl => next(remain.tail,toLineConstructor(hd) :: sched)
+          case _ => throw new Exception("Unidentified pattern")
+        }
+    }
+    next(lines.tail.toList,toLineConstructor(lines.head)::List[LineConstructor]())
+  }
+
+
+  def loadData: Unit = {
+
+    Logger.info("Loading Journal Entry Data..")
+
+    loadJournalEntryData.map { i =>
+      Logger.info(s"JournalEntry Data Load Complete. Total ${i} rows")
+
+      loadJournalLineData.map { i => Logger.info(s"JournalLine Data Load Complete. Total ${i} rows")
+      }
+    }
+  }
+
+
+    def loadJournalEntryData:Future[Unit] = {
+      val sdf = new SimpleDateFormat("yyyy/MM/dd")
+      val source = Source.fromFile("./public/sampledata/journalentrydata.csv")
+      val jeList = new ListBuffer[JournalEntry]()
+      for (line <- source.getLines().drop(1)) {
+        val cols = line.split(",").map(_.trim)
+        val je = JournalEntry(0, new Timestamp(System.currentTimeMillis()), new java.sql.Date(sdf.parse(cols(0)).getTime))
+        jeList += je
+      }
+      source.close()
+      db.run((journalEntries ++= jeList).transactionally).map{_=>db.run(journalEntries.length.result)
+        .map{i=>Logger.info(s"JournalLine DAta Load Complete ${i} rows LOADED")}}
+
+    }
+
+    def loadJournalLineData: Future[Int] = {
+      val source = Source.fromFile("./public/sampledata/journallinedata.csv")
+      val jlList = new ListBuffer[JournalLine]()
+      for (line <- source.getLines().drop(1)) {
+        val cols = line.split(",").map(_.trim)
+        val jl = JournalLine(0, cols(0).toLong, cols(1).toInt, BigDecimal(cols(2)), Some(cols(3)), Some(cols(4).toLong))
+        jlList += jl
+      }
+      source.close()
+      db.run((journalLines ++= jlList).transactionally)
+      Thread.sleep(3000)
+      db.run(journalLines.length.result)
+    }
+
+  /**
+    * Calculate interest to date on loans in sample data set. Identify loan applications that have drawn down by selecting
+    * rows in JournalLine table that have account id = 1050 (the Loan Disbursement Account). For each loan obtain a list of
+    * profiled payment due dates. On each profile payment date, the accumulated daily interest accrual is charged to the loan
+    * capital (interest compounded).
+    */
+  def sampleDataInterestCharge: Unit = {
+
+    Logger.info("Calculating interest on sample loan book...")
+
+    //Query the db to get a list of loans drawn down.
+    //SQL EQUIVALENT: SELECT jl.laId, je.entryDate FROM JournalLines jl, JournalEntries je WHERE jl.laId = 1050;
+
+    val query = for {
+      ((jl, je), la) <- journalLines.filter(_.aId === 1050) join
+        journalEntries on (_.jeId === _.id) join
+        loanApplications on (_._1.laId === _.id)
+    } yield (jl.laId, je.entryDate, la.offerAPR, la.term)
+
+    //for each loan begin accruing interest on balance outstanding each day since drawdown day until today.
+
+    db.run(query.result).map { a => a.foreach(
+
+      x => loan(
+        x._1 match {
+      case Some(i) => i
+      case None => throw new IllegalArgumentException("ERROR: entryDate when calling loan in LedgerDAO")
+      },
+        x._2.toLocalDate,
+        x._3 match {
+        case Some(r) => r
+        case None => throw new IllegalArgumentException("")
+      }, x._4))
+    }
+
+    def loan(id:Long,drawDownDate:LocalDate,apr:BigDecimal,term:Int): Unit = {
+
+      val paymentDates = FinOps.getPaymentDates(drawDownDate,term).tail
+
+      val today = LocalDate.now
+
+      def next(localDate: LocalDate): Unit = {
+        if(paymentDates.contains(localDate)) compoundInterest(id,localDate)
+        val dateDiff = ChronoUnit.DAYS.between(localDate, today)
+        dateDiff match {
+          case 0 => accrueInterest(id, localDate, apr)
+          case x if (x > 0) => accrueInterest(id, localDate, apr)
+
+            next(localDate.plusDays(1))
+          case _ => Logger.info(s"Future dated loan: ${id} drawdown on ${drawDownDate}")
+        }
+      }
+
+      next(drawDownDate)
+    }
+  }
+
+  def compoundInterest(id:Long, localDate: LocalDate):Future[Unit] = {
+
+    //Equivalent SQL: SELECT jl.amount FROM journal_lines jl, journal_entry je WHERE jl.je_id = je.id AND
+    //jl.a_id = 1600 and jl.la_id = ?
+    val query = for{
+      (jl,je) <- journalLines.filter(x => x.aId===1600 && x.laId===id) join
+        journalEntries on (_.jeId===_.id)
+    } yield jl.amount
+
+    //db.run(query.result).map{y => for (l <- y){
+      //println(s"LOAN ID: ${id} DATE: ${l._1} AMOUNT: ${l._2}")
+
+    //}
+    //}}
+
+    db.run(query.result).map{y =>
+      val intBal = (BigDecimal(0) /: y) (_+_)
+      //println(s"NOW print the list of y query to get intBal.....FOR LOAN ID: ${id} ON DATE: ${localDate}")
+      //y.foreach(println _)
+      //println(s"Now the sum of intBal list is: ${intBal}.")
+      insertJournalEntry(localDate,1200,1600,intBal,Some("interest charge"),Some(id))
+    }}
+
+
+
+
+
+
+    def delete: Future[Unit] = {
+      Logger.info("Deleting Journal Entry data...")
+      db.run(journalLines.delete.transactionally).map { _ => Logger.info("Journal lines Deleted.") }
+      db.run(journalEntries.delete.transactionally).map { _ => Logger.info("Journal entries Deleted.") }
+      db.run(accounts.delete.transactionally).map { _ => Logger.info("Accounts Deleted.") }
+    }
+
+  def interestonFakeData = {
+
+    db.run(journalLines.filter(x=>x.aId===1050 && x.memo.startsWith("drawdown")).map(_.laId).result).map{x => x.foreach( y => y match {
+      case Some(i) => loanDebtor(i)
+      case None => Logger.error("Could not complete interest accrual on fake loan data: missing loan id")
+    })}
+  }
+
+
+
+  def loanDebtor(id:Long) = {
+
+    case class LoanDebtor(entryDate:LocalDate,amount:BigDecimal,memo:String)
+    val loanDebtor = new ListBuffer[LoanDebtor]()
+
+    db.run(loanApplications.filter(_.id===id).map(x=>(x.offerAPR,x.term)).result.headOption).map{y =>
+      val query = (for {
+        (jl,je) <- journalLines.filter(x=>(x.aId===1200 && x.laId===id)) join
+        journalEntries on (_.jeId===_.id)
+      } yield (je.entryDate, jl.amount, jl.memo)).sortBy(_._1.asc)
+      db.run(query.result).map(x=>x.foreach(y=> loanDebtor += LoanDebtor(y._1.toLocalDate,y._2,y._3 match {
+        case Some(s) => s
+        case None => throw new IllegalArgumentException("")
+      })))
+      val accrualDates = FinOps.getPaymentDates(loanDebtor.toList.head.entryDate,y match {
+        case Some((Some(i),j)) => j
+        case None => 0
+      })
+      println("NOW PRINTING THE BUFFERERED LIST....")
+      loanDebtor.toList.foreach( println )
+      interestAccrual(accrualDates,loanDebtor.toList,y match {
+        case Some((Some(i),j)) => i
+      })
+    }
+
+    def intCalc(sched:List[LoanDebtor],apr:BigDecimal):BigDecimal = {
+        (BigDecimal(0) /: sched.map(_.amount))(_+_) * apr/365
+    }
+
+    def bal(sched:List[LoanDebtor],compBal:BigDecimal,localDate:LocalDate):BigDecimal={
+      sched.filter(x=> x.entryDate.isBefore(localDate) || x.entryDate.isEqual(localDate))
+        .map(_.amount).fold(BigDecimal(0))(_+_) + compBal
+    }
+
+    def interestAccrual(dueDates:List[LocalDate],debtor:List[LoanDebtor],apr:BigDecimal):List[LoanDebtor] = {
+      def next(localDate: LocalDate, sched:List[LoanDebtor],compoundBal:BigDecimal,
+               accruedBal:BigDecimal): List[LoanDebtor] = {
+        localDate.isEqual(LocalDate.now) match {
+          case true => sched.reverse
+          case false => dueDates.tail.contains(localDate) match {
+            case true => //Accumulated accrued interest needs to be compounded to the loan balance.
+
+              val interest = {
+              bal(debtor,compoundBal + accruedBal,localDate) * apr/365
+            }
+              if(interest > 0 ) {
+                insertJournalEntry(localDate,1200,1600,compoundBal,Some("compound interest"),Some(id))
+                insertJournalEntry(localDate,1600,4000,interest,Some("interest accrual"),Some(id))
+              }
+              next(localDate.plusDays(1),LoanDebtor(localDate,compoundBal,"compound interest")
+                ::sched,compoundBal + accruedBal,BigDecimal(0))
+
+            case false =>
+
+              val interest = {
+                bal(debtor,compoundBal,localDate) * apr/365
+              }
+              if(interest >0 ) {
+                insertJournalEntry(localDate,1600,4000,interest,Some("interest accrual"),Some(id))
+              }
+              next(localDate.plusDays(1),LoanDebtor(localDate,BigDecimal(0),"")::sched,compoundBal,accruedBal +interest)
+
+          }
+
+        }
+      }
+      insertJournalEntry(debtor.head.entryDate,1600,4000,debtor.head.amount*apr/365,Some("interest accrual"),Some(id))
+      next(debtor.head.entryDate.plusDays(1),debtor.head :: Nil,BigDecimal(0),debtor.head.amount*apr/365)
+    }
+
+
+
+
+
+  }
+
+
+
+
+    //Obtain all rows in the loan debtor account to begin interest accrual calaculation.
+    //Equivalenet SQL:
+    // SELECT JL.LA_ID,LA.AMOUNT,JE.ENTRY_DATE,JL.MEMO,LA.TERM,LA.OFFER_APR
+    // FROM JOURNAL_LINES JE, JOURNAL_ENTRIES JE, LOAN_APPLICATIONs LA
+    // WHERE JL.JE_ID = JE.ID AND JL.LA_ID = LA.ID AND JL.A_ID = 1200 ORDER BY JL.LA_ID ASC;
+    val query = (for {
+      ((jl, je), la) <- journalLines.filter(_.aId === 1200) join
+        journalEntries on (_.jeId === _.id) join
+        loanApplications on (_._1.laId === _.id)
+    } yield (jl.laId, la.amount, je.entryDate, jl.memo, la.term, la.offerAPR)).sortBy(_._1.asc)
+
+
+    case class LoanDebtor(id: Long, amount: BigDecimal, drawdown: LocalDate, memo: String, term: Int, apr: BigDecimal)
+
+    val loanDebtors = new ListBuffer[LoanDebtor]()
+
+
+    db.run(query.result).map(x=>x.foreach(y=> loanDebtors += LoanDebtor(y._1 match {
+      case Some(i) => i
+      case None => throw new IllegalArgumentException("")
+    },y._2,y._3.toLocalDate,y._4 match {
+      case Some(s) => s
+      case None => throw new IllegalArgumentException("")
+    },y._5, y._6 match {
+      case Some(apr)=> apr
+      case None => throw new IllegalArgumentException("")
+    })))
+
+
+
+
+
+
 
 
 
 
 
 }
+
+
+
+
+
 
 

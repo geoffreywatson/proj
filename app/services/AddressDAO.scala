@@ -3,10 +3,12 @@ package services
 import javax.inject.Inject
 
 import models.{Address, CompanyAddress, UserAddress, UserCompany}
+import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.io.Source
@@ -87,6 +89,8 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
   val insertQuery = addresses returning addresses.map(_.id) into ((addrs, id) => addrs.copy(id = id))
 
 
+
+
   /**
     * Insert a UserAddress. In this case the id is not required so the db insert operation is fully asynchronous
     * i.e. non-blocking.
@@ -119,56 +123,48 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
 
   def loadData = {
 
-    println("Called AddressDAO.loadData...")
+    Logger.info("Load address data CALLED...")
 
+    //db.run(addresses.length.result).map{x=>if(x==0)loadAddresses}
+    loadAddresses
 
-    db.run(addresses.length.result) onComplete {
-      case Success(l) => l match {
-        case 0 => loadAddresses
-      }
-    }
     Thread.sleep(3000)
 
-    db.run(userAddresses.length.result) onComplete {
-      case Success(l) => if(l==0){
-        loadUserAddress
-      }
-    }
-
-
-
-
-    def insertAddress(address: Address): Future[Unit] = {
-      db.run(addresses += address).map { _ => () }
-    }
-
-    def insertUserAddress(userAddress:UserAddress): Future[Unit] = {
-      db.run(userAddresses += userAddress).map{_=>()}
-    }
+    //db.run(userAddresses.length.result).map{x=>if(x==0)loadUserAddress}
+    loadUserAddress
 
     def loadAddresses:Unit = {
       val source = Source.fromFile("./public/sampledata/addressdata.csv")
+      val addressList = new ListBuffer[Address]()
       for (line <- source.getLines().drop(1)) {
         val cols = line.split(",").map(_.trim)
         val address = Address(0, cols(0), cols(1), cols(2), cols(3), cols(4), cols(5),
           new java.sql.Timestamp(System.currentTimeMillis()))
-        insertAddress(address)
+        addressList += address
       }
       source.close()
+      db.run((addresses ++= addressList).transactionally)
     }
 
     def loadUserAddress = {
       val source = Source.fromFile("./public/sampledata/useraddressdata.csv")
-      //val listBuffer:ListBuffer[UserAddress] = new ListBuffer[UserAddress]()
+      val userAddressList = new ListBuffer[UserAddress]()
       for (line <- source.getLines().drop(1)){
         val cols = line.split(",").map(_.trim)
         val userAddress = UserAddress(0,cols(0),cols(1).toLong)
-        insertUserAddress(userAddress)
-
+        userAddressList += userAddress
       }
       source.close()
+      db.run((userAddresses ++= userAddressList).transactionally)
 
     }
+  }
+
+
+  def delete:Future[Unit] ={
+    Logger.info("Deleteing address data...")
+    db.run(userAddresses.delete.transactionally).map{_=>Logger.info("UserAddress data deleted.")}
+    db.run(addresses.delete.transactionally).map{_=>Logger.info("Address data deleted.")}
   }
 
 }

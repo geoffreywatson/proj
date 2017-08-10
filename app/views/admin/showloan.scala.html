@@ -1,0 +1,31 @@
+@(loan:List[AmortizationLine])(implicit messages:Messages, flash:Flash)
+
+@admin.admintemplate("loan id: 59") {
+
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>OBal</th>
+                    <th>Drawdown</th>
+                    <th>Interest</th>
+                    <th>Payment</th>
+                    <th>EBal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(l <- loan){
+                <tr>
+                    <td>@l.date</td>
+                    <td>@java.text.NumberFormat.getInstance.format(l.obal)</td>
+                    <td>@java.text.NumberFormat.getInstance.format(l.drawdown)</td>
+                    <td>@java.text.NumberFormat.getInstance.format(l.int)</td>
+                    <td>@java.text.NumberFormat.getInstance.format(l.pmt)</td>
+                    <td>@java.text.NumberFormat.getInstance.format(l.ebal)</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
