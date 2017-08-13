@@ -33,7 +33,7 @@ class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecyc
   companyDAO.loadData
   loanApplicationDAO.loadData
   ledgerDAO.loadData
-  Thread.sleep(20000)
+  Thread.sleep(5000)
   ledgerDAO.interestonFakeData
 
   def wipeDb = {
