@@ -37,9 +37,9 @@ GET     /acceptoffer/:id            controllers.Admin.acceptOffer(id:Long)
 
 GET     /disburseloan/:id           controllers.Admin.disburseLoan(id:Long)
 
-GET     /admin/loanbook/:id         controllers.Admin.loanBook(id:Long)
+GET     /admin/loanbook             controllers.Admin.loanBook
 
-GET     /admin/intchg                  controllers.Admin.intCharge
+GET     /admin/showloan/:id         controllers.Admin.showLoan(id:Long)
 
 POST    /reviewapp                  controllers.Admin.insertReviewData
 

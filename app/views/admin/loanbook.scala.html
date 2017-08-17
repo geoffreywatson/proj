@@ -1,0 +1,36 @@
+@(loans:List[Loan])(implicit messages: Messages, flash: Flash)
+
+@admin.admintemplate("Loan Book"){
+
+
+
+    <div class="container">
+        <h2>Loan Book</h2>
+        <br>
+        <table class="table table-hover">
+            <tr>
+                <th>ID</th>
+                <th>Obligor</th>
+                <th>Draw Date</th>
+                <th>Draw Amount</th>
+                <th>Balance</th>
+                <th>Arrears Amount</th>
+                <th>Arrears Days</th>
+                <th>Status</th>
+            </tr>
+            @for(l <- loans){
+                <tr>
+                    <td><a href="@routes.Admin.showLoan(l.id)">@l.id</a></td>
+                    <th>@l.name</th>
+                    <th>@l.actual.head.date</th>
+                    <th>@java.text.NumberFormat.getCurrencyInstance.format(l.actual.head.drawdown)</th>
+                    <th>@java.text.NumberFormat.getCurrencyInstance.format(l.bal)</th>
+                    <th>@java.text.NumberFormat.getCurrencyInstance.format(l.arrearsAmount)</th>
+                    <th>@l.arrearsDays</th>
+                    <th>@l.status</th>
+                </tr>
+            }
+        </table>
+    </div>
+
+}

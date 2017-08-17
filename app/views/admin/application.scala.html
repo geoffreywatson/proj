@@ -72,7 +72,7 @@
                 <h4>Expected new jobs created:</h4>
             </div>
             <div class="col-md-3">
-                <h4>£@("%.2f".format(app.loanApplication.amount))</h4>
+                <h4>@java.text.NumberFormat.getCurrencyInstance.format(app.loanApplication.amount)</h4>
                 <h4>@app.loanApplication.term months</h4>
                 <h4>@app.loanApplication.loanPurpose</h4>
                 <h4>@("%.1f".format(app.loanApplication.jobsCreated))</h4>
@@ -99,7 +99,7 @@
                     <div class="col-md-3">
                         <h4 style="color:blue">
                             <p>@app.loanApplication.status</p>
-                            <p>@app.loanApplication.offerAPR * 100</p>
+                            <p>@java.text.NumberFormat.getPercentInstance.format(app.loanApplication.offerAPR)</p>
                             <p>@app.loanApplication.reviewed</p>
                             <p>@app.loanApplication.reviewedBy</p>
                             <p>@app.loanApplication.comments</p>
@@ -130,7 +130,7 @@
                     <div class="col-md-3">
                         <h4 style="color:blue">
                             <p>@app.loanApplication.status</p>
-                            <p>@app.loanApplication.offerAPR * 100</p>
+                            <p>@java.text.NumberFormat.getPercentInstance.format(app.loanApplication.offerAPR)</p>
                             <p>@app.loanApplication.reviewed</p>
                             <p>@app.loanApplication.reviewedBy</p>
                             <p>@app.loanApplication.comments</p>

@@ -1,6 +1,6 @@
 @(loan:List[AmortizationLine])(implicit messages:Messages, flash:Flash)
 
-@admin.admintemplate("loan id: 59") {
+@admin.admintemplate("loan id") {
 
     <div class="container">
         <table class="table">
@@ -18,11 +18,11 @@
                 @for(l <- loan){
                 <tr>
                     <td>@l.date</td>
-                    <td>@java.text.NumberFormat.getInstance.format(l.obal)</td>
-                    <td>@java.text.NumberFormat.getInstance.format(l.drawdown)</td>
-                    <td>@java.text.NumberFormat.getInstance.format(l.int)</td>
-                    <td>@java.text.NumberFormat.getInstance.format(l.pmt)</td>
-                    <td>@java.text.NumberFormat.getInstance.format(l.ebal)</td>
+                    <td>@java.text.NumberFormat.getCurrencyInstance.format(l.obal)</td>
+                    <td>@java.text.NumberFormat.getCurrencyInstance.format(l.drawdown)</td>
+                    <td>@java.text.NumberFormat.getCurrencyInstance.format(l.int)</td>
+                    <td>@java.text.NumberFormat.getCurrencyInstance.format(l.pmt)</td>
+                    <td>@java.text.NumberFormat.getCurrencyInstance.format(l.ebal)</td>
                 </tr>
                 }
             </tbody>

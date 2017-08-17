@@ -28,6 +28,7 @@ class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecyc
   // This code is called when the application starts.
   private val start: Instant = clock.instant
   Logger.info(s"ApplicationTimer demo: Starting application at $start.")
+  Logger.info(s"Loading fake data into database...")
   userDAO.loadData
   addressDAO.loadData
   companyDAO.loadData
@@ -36,6 +37,7 @@ class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecyc
   Thread.sleep(5000)
   ledgerDAO.interestonFakeData
 
+// wipe the db on shutdown
   def wipeDb = {
     ledgerDAO.delete
     loanApplicationDAO.delete

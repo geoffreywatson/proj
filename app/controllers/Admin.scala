@@ -84,15 +84,15 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
     Future.successful(Redirect(routes.Admin.loanApps()))
   }
 
-  def loanBook(id:Long) = authAction.async(parse.default) { implicit request =>
-    ledgerDAO.actualAmortSched(id).map { f => Ok(views.html.admin.showloan(f))
+  def loanBook() = authAction.async(parse.default) { implicit request =>
+    Future.successful(Ok(views.html.admin.loanbook(ledgerDAO.loanBook())))
     }
+
+  def showLoan(id:Long) = authAction.async(parse.default) { implicit request =>
+    ledgerDAO.showLoan(id).map{f => Ok(views.html.admin.showloan(f))}
   }
 
-  def intCharge = Action {
-    ledgerDAO.sampleDataInterestCharge
-    Ok("INTEREST CHARGE CALCULATING")
-  }
+
 
 
 }

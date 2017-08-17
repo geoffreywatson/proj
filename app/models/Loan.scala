@@ -2,28 +2,39 @@ package models
 
 import java.time.LocalDate
 
+import play.api.Logger
+
 /**
   *
   * @param actual
   * @param profile
   */
 
-case class Loan(actual:List[AmortizationLine],profile:List[AmortizationLine]) {
+case class Loan(id:Long,name:String,actual:List[AmortizationLine],profile:List[AmortizationLine]) {
+
+
+  val bal:BigDecimal = bal(LocalDate.now,actual)
 
   def bal(localDate: LocalDate, sched: List[AmortizationLine]): BigDecimal = {
-    actual.filter(_.date == localDate).headOption.map(_.ebal) match {
-      case Some(ebal) => ebal
-      case None => throw new IndexOutOfBoundsException("Date not found")
+    sched.filter(_.date == localDate).headOption.map(_.ebal).getOrElse(0)
+  }
+
+  val arrearsAmount:BigDecimal = arrearsAmount(LocalDate.now)
+
+  def arrearsAmount(localDate: LocalDate):BigDecimal = {
+    balDiff(localDate) match {
+      case x if inArrears(localDate) => x
+      case _ => 0
     }
   }
 
-  def balDiff(localDate: LocalDate): BigDecimal = {
+  private def balDiff(localDate: LocalDate): BigDecimal = {
     val profileBal = bal(localDate, profile)
     val actualBal = bal(localDate, actual)
     actualBal - profileBal
   }
 
-  def inArrears(localDate: LocalDate): Boolean = {
+  private def inArrears(localDate: LocalDate): Boolean = {
     balDiff(localDate) match {
       case x if (x > 10 && x >.05 * bal(localDate, profile)) => true
       case _ => false
@@ -37,7 +48,6 @@ case class Loan(actual:List[AmortizationLine],profile:List[AmortizationLine]) {
         case true => next(count + 1, localDate.minusDays(1))
       }
     }
-
     next(0, LocalDate.now)
   }
 

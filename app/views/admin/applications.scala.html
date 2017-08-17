@@ -22,7 +22,7 @@
                     <td><a href="@routes.Admin.showApplication(a._2)">@a._2</a></td>
                     <td>@a._3</td>
                     <td>@a._4</td>
-                    <td>£@("%.2f".format(a._5))</td>
+                    <td>@java.text.NumberFormat.getCurrencyInstance.format(a._5)</td>
                     <td>@a._6</td>
                     <td>@a._7</td>
                 </tr>
