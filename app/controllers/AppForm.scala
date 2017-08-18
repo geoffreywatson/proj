@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class AppForm @Inject()(addressDAO: AddressDAO, userDao:UserDAO, companyForms:CompanyForms, companyDAO: CompanyDAO,
                         loanApplicationForms: LoanApplicationForms, loanApplicationDAO: LoanApplicationDAO,
-                        cc: ControllerComponents, authAction: AuthAction, ec:ExecutionContext )
+                        userForms: UserForms, cc: ControllerComponents, authAction: AuthAction, ec:ExecutionContext )
                         extends AbstractController(cc) with I18nSupport {
 
 
@@ -25,7 +25,7 @@ class AppForm @Inject()(addressDAO: AddressDAO, userDao:UserDAO, companyForms:Co
     */
 
   def insertUserDetails = authAction.async(parse.default) { implicit request =>
-    ContactForms.form.bindFromRequest.fold(
+    userForms.userDetailsForm.bindFromRequest.fold(
       hasErrors = { form =>
         Future.successful(Redirect(routes.AppForm.contactInfo()).flashing(Flash(form.data) + (
           "error" -> "[insertContact] error in form, please correct")))
@@ -44,9 +44,9 @@ class AppForm @Inject()(addressDAO: AddressDAO, userDao:UserDAO, companyForms:Co
     */
   def contactInfo = authAction.async(parse.default) { implicit request =>
         val form = if(request.flash.get("error").isDefined){
-          ContactForms.form.bind(request.flash.data)
+          userForms.userDetailsForm.bind(request.flash.data)
         } else
-          ContactForms.form
+          userForms.userDetailsForm
         Future.successful(Ok(views.html.user.contact(form)))
   }
 

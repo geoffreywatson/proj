@@ -21,29 +21,33 @@ import scala.concurrent.Future
  * application's [[ApplicationLifecycle]] to register a stop hook.
  */
 @Singleton
-class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecycle, userDAO: UserDAO,
-                                  addressDAO: AddressDAO, companyDAO: CompanyDAO, loanApplicationDAO: LoanApplicationDAO,
-                                  ledgerDAO: LedgerDAO) {
+class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecycle, userDAO: Provider[UserDAO],
+                                  addressDAO: Provider[AddressDAO], companyDAO: Provider[CompanyDAO],
+                                  loanApplicationDAO: Provider[LoanApplicationDAO],
+                                  ledgerDAO: Provider[LedgerDAO]) {
 
   // This code is called when the application starts.
   private val start: Instant = clock.instant
   Logger.info(s"ApplicationTimer demo: Starting application at $start.")
   Logger.info(s"Loading fake data into database...")
-  userDAO.loadData
-  addressDAO.loadData
-  companyDAO.loadData
-  loanApplicationDAO.loadData
-  ledgerDAO.loadData
+  userDAO.get().loadUserData()
+  addressDAO.get().loadAddressData()
+  addressDAO.get().loadUserAddressData()
+  companyDAO.get().loadCompanyData()
+  companyDAO.get().loadUserCompanyData()
+  addressDAO.get().loadCompanyAddressData()
+  loanApplicationDAO.get().loadLoanApplicationData()
+  ledgerDAO.get().loadData
   Thread.sleep(5000)
-  ledgerDAO.interestonFakeData
+  ledgerDAO.get().interestonFakeData
 
 // wipe the db on shutdown
   def wipeDb = {
-    ledgerDAO.delete
-    loanApplicationDAO.delete
-    userDAO.delete
-    companyDAO.delete
-    addressDAO.delete
+    ledgerDAO.get().delete
+    loanApplicationDAO.get().delete
+    userDAO.get().delete
+    companyDAO.get().delete
+    addressDAO.get().delete
   }
 
 

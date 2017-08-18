@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.inject.{Inject, Singleton}
 
+import com.google.inject.Provider
 import models._
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
@@ -22,7 +23,8 @@ import scala.concurrent.duration._
   * Created by geoffreywatson on 14/07/2017.
   */
 @Singleton
-class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicationDAO: LoanApplicationDAO)
+class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loanApplicationDAO: Provider[LoanApplicationDAO],
+                           val companyDAO: Provider[CompanyDAO])
                           (implicit ec: ExecutionContext) {
 
   case class LineConstructor(date:LocalDate,draw:BigDecimal,int:BigDecimal,pmt:BigDecimal)
@@ -43,8 +45,8 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
   }
 
   val accounts = TableQuery[AccountTable]
-  val companies = TableQuery[CompanyTable]
-  val userComps = TableQuery[UserCompanyTable]
+  val companies = companyDAO.get().companies
+  val userComps = companyDAO.get().userComps
 
   def accountIdExists(id: Int): Boolean = {
     val query = accounts.filter(_.id === id).exists.result
@@ -85,7 +87,7 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
 
   val journalLines = TableQuery[JournalLineTable]
   val journalEntries = TableQuery[JournalEntryTable]
-  val loanApplications = TableQuery[LoanApplicationTable]
+  val loanApplications = loanApplicationDAO.get().loanApplications
 
 
 
@@ -161,7 +163,7 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
           accrueInterest(loanId, entryDate, p._2 match {
             case Some(r) => r
           })
-          loanApplicationDAO.updateStatus(loanId, "Drawndown")
+          loanApplicationDAO.get().updateStatus(loanId, "Drawndown")
       }
     }
   }
@@ -355,7 +357,7 @@ class LedgerDAO @Inject() (dbConfigProvider:DatabaseConfigProvider, loanApplicat
 //Auto-run on application startup
   def loadData: Unit = {
 
-    Logger.info("Loading fake journal data..")
+    Logger.info("Loading fake journal data...")
 
     loadJournalEntryData.map{_=>loadJournalLineData.map{_=>()}}
 

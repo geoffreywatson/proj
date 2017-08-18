@@ -23,8 +23,10 @@ class Application @Inject() (userDao:UserDAO, userForms: UserForms, authAction: 
 
 
 
-  def index = authAction.async(parse.default) { implicit request =>
+  def index = Action.async(parse.default) { implicit request =>
+
     val user = request.session.data.get("connected").getOrElse("")
+
     val futOption:Future[Option[(Long,String)]] = loanApplicationDAO.applicationStatus(user)
     Await.result(futOption,Duration(1,SECONDS)) match {
       case Some(res) => Future.successful(Ok(views.html.user.welcome(res._1,res._2,user)))
@@ -86,11 +88,9 @@ class Application @Inject() (userDao:UserDAO, userForms: UserForms, authAction: 
     */
 
   def userExists(email:String) = Action.async(parse.default) { implicit request =>
-    //val f = Await.result(userDao.userExists(email),scala.concurrent.duration.Duration(1,"seconds"))
-    //val result = Json.toJson(f)
+
     val fut:Future[Boolean] = userDao.userExists(email)
     fut.map(r => Ok(Json.toJson(r)))
-    //(Ok(result))
   }
 
 

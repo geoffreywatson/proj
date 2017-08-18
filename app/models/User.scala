@@ -18,6 +18,8 @@ import scala.util.matching.Regex
 
   case class UserRegisterFormData(email: String, password: String, confirmPswd: String)
 
+  case class UserDetailsFormData(title:String,firstName:String,middleName:String,lastName:String, dob:java.sql.Date,nin:String)
+
   case class LoginUser(email:String,password:String)
 
   case class UserAddress(id:Long,email:String,aid:Long)
@@ -27,7 +29,7 @@ import scala.util.matching.Regex
     val userRegForm = Form(
       mapping(
         "email" -> email,
-        "password" -> nonEmptyText.verifying(inValidPswdMsg,pswd=>passwordIsValid(pswd)),
+        "password" -> nonEmptyText.verifying(invalidPswdMsg,pswd=>passwordIsValid(pswd)),
         "confirmPswd" -> nonEmptyText
       )(UserRegisterFormData.apply)(UserRegisterFormData.unapply) verifying("failed constraints!", result =>
       result match {
@@ -35,7 +37,18 @@ import scala.util.matching.Regex
       })
     )
 
-    val inValidPswdMsg = "Password must: 8+ chars incl. [a-z] + [A-Z]."
+    val userDetailsForm:Form[UserDetailsFormData] = Form(
+      mapping(
+        "title" -> text,
+        "firstName" -> text,
+        "middleName" -> text,
+        "lastName" -> nonEmptyText,
+        "dob" -> sqlDate,
+        "nin" -> nonEmptyText
+      )(UserDetailsFormData.apply)(UserDetailsFormData.unapply)
+    )
+
+    val invalidPswdMsg = "Password must: 8+ chars incl. [a-z] + [A-Z]."
 
 
     def passwordIsValid(pswd:String):Boolean={

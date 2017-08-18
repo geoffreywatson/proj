@@ -5,6 +5,10 @@ import play.api.mvc._
 
 import filters.ExampleFilter
 
+
+//This file has been left unchanged from the original Play distrubution and therefore does not
+// form part of the project.
+
 /**
  * This class configures filters that run on every request. This
  * class is queried by Play to get a list of filters.

@@ -14,17 +14,6 @@ create table USER (
   NIN VARCHAR(9)
   );
 
-create table CONTACT(
-  ID BIGINT PRIMARY KEY AUTO_INCREMENT,
-  UID BIGINT,
-  CREATED TIMESTAMP NOT NULL,
-  TITLE VARCHAR(5),
-  FIRST_NAME VARCHAR(255),
-  MIDDLE_NAME VARCHAR(255),
-  LAST_NAME VARCHAR(255),
-  DOB DATE,
-  NIN VARCHAR(9)
-  );
 
 create table ADDRESS(
   ID BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -126,7 +115,6 @@ create table JOURNAL_LINE (
 
 # --- !Downs
 drop table USER;
-drop table CONTACT;
 drop table ADDRESS;
 drop table USER_ADDRESS;
 drop table COMPANY;

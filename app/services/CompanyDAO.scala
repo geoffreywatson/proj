@@ -2,17 +2,16 @@ package services
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
-import models.{Company, CompanyAddress, UserCompany}
+import com.google.inject.Provider
+import models.{Company, UserCompany}
 import play.api.Logger
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import slick.driver.JdbcProfile
-import slick.driver.MySQLDriver.api._
+import play.api.db.slick.DatabaseConfigProvider
+import slick.jdbc.JdbcProfile
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{Await, Future, duration}
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, ExecutionContext, Future, duration}
 import scala.io.Source
 import scala.util.Success
 
@@ -21,54 +20,56 @@ import scala.util.Success
   */
 
 
-class CompanyTable(tag:Tag) extends Table[Company](tag,"COMPANY"){
-  def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
-  def name = column[String] ("NAME")
-  def tradingDate = column[java.sql.Date] ("TRADING_DATE")
-  def sector = column[String] ("SECTOR")
-  def ftJobs = column[BigDecimal] ("FT_JOBS")
-  def ptJobs = column[BigDecimal] ("PT_JOBS")
-  def legalForm = column[String] ("LEGAL_FORM")
-  def url = column[Option[String]] ("URL")
-  def created = column[java.sql.Timestamp] ("CREATED")
+// need to define injected DAO's as vals for all foreign keys otherwise compiler error as access needs to
+// be made public (from default private)
+@Singleton
+class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO: Provider[UserDAO])
+                          (implicit ec:ExecutionContext)  {
 
-  def * = (id,name,tradingDate,sector,ftJobs,ptJobs,legalForm,url,created) <> (Company.tupled, Company.unapply)
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
 
-}
+  import dbConfig._
+  import profile.api._
 
-class UserCompanyTable(tag:Tag) extends Table[UserCompany](tag,"USER_COMPANY"){
-  def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
-  def email = column[String] ("EMAIL")
-  def cid = column[Long]("CID")
-  def created = column[java.sql.Timestamp]("CREATED")
+  class CompanyTable(tag:Tag) extends Table[Company](tag,"COMPANY"){
+    def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
+    def name = column[String] ("NAME")
+    def tradingDate = column[java.sql.Date] ("TRADING_DATE")
+    def sector = column[String] ("SECTOR")
+    def ftJobs = column[BigDecimal] ("FT_JOBS")
+    def ptJobs = column[BigDecimal] ("PT_JOBS")
+    def legalForm = column[String] ("LEGAL_FORM")
+    def url = column[Option[String]] ("URL")
+    def created = column[java.sql.Timestamp] ("CREATED")
 
-  val comps = TableQuery[CompanyTable]
-  val users = TableQuery[UserTable]
+    def * = (id,name,tradingDate,sector,ftJobs,ptJobs,legalForm,url,created) <> (Company.tupled, Company.unapply)
 
-  def comp = foreignKey("COMP_FK",cid,comps)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
-  def user = foreignKey("USER_FK", email, users)(_.email, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
-
-  def * = (id,email,cid,created)<>(UserCompany.tupled, UserCompany.unapply)
-}
+  }
 
 
+  class UserCompanyTable(tag:Tag) extends Table[UserCompany](tag,"USER_COMPANY"){
+    def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
+    def email = column[String] ("EMAIL")
+    def cid = column[Long]("CID")
+    def created = column[java.sql.Timestamp]("CREATED")
 
+    def comp = foreignKey("COMP_FK",cid,companies)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+    def user = foreignKey("USER_FK", email, users)(_.email, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
 
-
-class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
+    def * = (id,email,cid,created)<>(UserCompany.tupled, UserCompany.unapply)
+  }
 
   val companies = TableQuery[CompanyTable]
   val userComps = TableQuery[UserCompanyTable]
-  val companyAddresses = TableQuery[CompanyAddressTable]
+  //val companyAddresses = addressDAO.get().compAddresses
+  val users = userDAO.get().users
 
   val insertCompQuery = companies returning companies.map(_.id) into ((comp,id) => comp.copy(id = id))
 
 
-
-
   def insert(company:Company, user:String): Unit={
     val action = insertCompQuery += company
-    val futureCompany = db.run(action)
+    val futureCompany:Future[Company] = db.run(action)
     futureCompany.onSuccess{
       case comp => db.run(userComps += UserCompany(0,user,comp.id,new Timestamp(System.currentTimeMillis())))
     }
@@ -85,26 +86,23 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
   }
 
 
-  def loadData = {
+  //load fake company data from csv file if there is no data in db.
+  def loadCompanyData():Unit = {
+    db.run(companies.length.result).map { x => if (x == 0) {
+        Logger.info("Loading fake company data...")
+        loadCompany()
+      }}
+  }
 
-    Logger.info("Load Company data CALLED...")
+  //load fake user_company data from csv file if there is no data in db.
+  def loadUserCompanyData():Unit = {
+    db.run(userComps.length.result).map { x => if (x==0) {
+      Logger.info("Loading fake user_company data...")
+      loadUserCompany()
+    }}
+  }
 
-    //db.run(companies.length.result).map{x=>if(x==0)loadCompanyData}
-    loadCompanyData
-
-    Thread.sleep(3000)
-
-    //db.run(userComps.length.result).map{x=>if(x==0)loadUserCompanyData}
-
-    loadUserCompanyData
-
-    Thread.sleep(3000)
-
-    //db.run(companyAddresses.length.result).map{x=>if(x==0)loadCompanyAddressData}
-
-    loadCompanyAddressData
-
-    def loadCompanyData:Unit = {
+    private def loadCompany():Unit = {
       val source = Source.fromFile("./public/sampledata/companydata.csv")
       val companyList = new ListBuffer[Company]()
       val sdf = new SimpleDateFormat("yyyy/MM/dd")
@@ -118,7 +116,7 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
       db.run((companies ++= companyList).transactionally)
     }
 
-    def loadUserCompanyData:Unit = {
+    private def loadUserCompany():Unit = {
       val source = Source.fromFile("./public/sampledata/usercompanydata.csv")
       val userCompanyList = new ListBuffer[UserCompany]()
       for (line <- source.getLines().drop(1)){
@@ -130,32 +128,9 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
       db.run((userComps ++= userCompanyList).transactionally)
     }
 
-    def loadCompanyAddressData:Unit = {
-      val source = Source.fromFile("./public/sampledata/companyaddressdata.csv")
-      val companyAddressList = new ListBuffer[CompanyAddress]()
-      for (line <- source.getLines().drop(1)){
-        val cols = line.split(",").map(_.trim)
-        val companyAddress = CompanyAddress(0,cols(0).toLong,cols(1).toLong)
-        companyAddressList += companyAddress
-      }
-      source.close()
-      db.run((companyAddresses ++= companyAddressList).transactionally)
-    }
-  }
-
   def delete:Future[Unit] = {
     Logger.info("Begin delete company data...")
     db.run(userComps.delete.transactionally).map{_=>Logger.info("Deleted UserCompany data.")}
-    db.run(companyAddresses.delete.transactionally).map{_=>Logger.info("Deleted CompanyAddress data.")}
     db.run(companies.delete.transactionally).map{_=>Logger.info("Deleted Company data.")}
   }
-
-
-
-
-
-
-
-
-
 }

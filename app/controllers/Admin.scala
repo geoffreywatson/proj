@@ -5,7 +5,7 @@ import javax.inject._
 
 import models._
 import play.api.i18n.I18nSupport
-import play.api.mvc.{AbstractController, ControllerComponents, Flash}
+import play.api.mvc._
 import services._
 
 import scala.concurrent.Future
@@ -20,20 +20,22 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
                       authAction: AuthAction, cc:ControllerComponents)
   extends AbstractController(cc) with I18nSupport{
 
+  //obtain a list of loan applications from the DAO and then render in a view
   def loanApps = authAction.async(parse.default) { implicit request =>
    val fut:Future[Seq[(Timestamp,Long,String,String,BigDecimal,Int, String)]] = loanApplicationDAO.fullView
    fut.map(f => Ok(views.html.admin.applications(f)))
   }
+
+
   def showApplication(id:Long) = authAction.async(parse.default) { implicit request =>
       val completeApplication:CompleteApplication = loanApplicationDAO.reviewApp(id)
-
     val form = if(request.flash.get("error").isDefined){
       loanApplicationForms.reviewForm.bind(request.flash.data)
-    } else
-    loanApplicationForms.reviewForm
-
-    Future.successful(Ok(views.html.admin.application(completeApplication, form)).withSession(
-      request.session + ("loanID"->id.toString)))
+    } else {
+      loanApplicationForms.reviewForm
+    }
+      Future.successful(Ok(views.html.admin.application(completeApplication, form)).withSession(
+        request.session + ("loanID" -> id.toString)))
   }
 
 
@@ -42,17 +44,17 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
     val loanId = request.session.data.getOrElse("loanID","0").toLong
 
     loanApplicationForms.reviewForm.bindFromRequest.fold(
-      hasErrors = { form =>
-        Future.successful(Redirect(routes.Admin.showApplication(loanId))
+      hasErrors = { form => Future.successful(Redirect(routes.Admin.showApplication(loanId))
           .flashing(Flash(form.data) + ("error" -> "[insertReviewData] errors in form, please correct")))
       }, reviewData => {
-
         loanApplicationDAO.insertReviewData(loanId,ReviewData(
-          new Timestamp(System.currentTimeMillis()),request.session.data.getOrElse("connected",""),reviewData.comments,
-          reviewData.accepted,reviewData.offerAPR/100)
+          new Timestamp(System.currentTimeMillis()),
+          request.session.data.getOrElse("connected",""),
+          reviewData.comments,
+          reviewData.accepted,
+          reviewData.offerAPR/100)
         )
         if(reviewData.accepted){
-
           Future.successful(Redirect(routes.Admin.prepareOffer(loanId)).withSession(request.session - "LoanID"))
         }
         else
@@ -64,8 +66,6 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
   def prepareOffer(loanId:Long) = authAction.async(parse.default) { implicit request =>
     val preparedOffer = loanApplicationDAO.prepareOffer(loanId)
     val prepareEmail = loanApplicationDAO.prepareEmail(loanId)
-    println("loanID in preparedOffer: " + loanId)
-    println("prepareEmail email: " + prepareEmail._1 +  " fullName: " + prepareEmail._2)
     Future.successful(Ok(views.html.admin.prepareoffer(preparedOffer,prepareEmail)))
   }
 

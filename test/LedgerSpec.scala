@@ -30,5 +30,23 @@ class LedgerSpec extends PlaySpec {
     }
   }
 
+  "An Account" must {
+    "throw IllegalArgumentException if the id is a negative integer" in {
+      a [IllegalArgumentException] must be thrownBy {
+        Account(-1200,"Debtor","ASSET")
+      }
+    }
+  }
+
+  "A CompleteJournalEntry" must {
+    "only be valid if the sum of the amount field in all of it's JournalLines is 0" in {
+      a [IllegalArgumentException] must be thrownBy {
+        CompleteJournalEntry(LocalDate.now,List(JournalLine(1,1,1200,125600.33,None,None),
+          JournalLine(2,1,1050,120.00,None,None)))
+      }
+    }
+
+  }
+
 
 }

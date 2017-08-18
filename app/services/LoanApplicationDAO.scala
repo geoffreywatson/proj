@@ -2,61 +2,66 @@ package services
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import models._
 import play.api.Logger
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import slick.driver.JdbcProfile
-import slick.driver.MySQLDriver.api._
+import play.api.db.slick.DatabaseConfigProvider
+import slick.jdbc.JdbcProfile
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future, duration}
+import scala.concurrent.{Await, ExecutionContext, Future, duration}
 import scala.io.Source
 
 /**
   * Created by geoffreywatson on 08/04/2017.
   */
 
-class LoanApplicationTable(tag:Tag) extends Table[LoanApplication](tag,"LOAN_APPLICATION"){
-
-  def id = column[Long]("ID", O.AutoInc, O.PrimaryKey)
-  def userCoID = column[Long]("USERCO_ID")
-  def amount = column[BigDecimal]("AMOUNT")
-  def term = column[Int]("TERM")
-  def jobs = column[BigDecimal]("JOBS_CREATED")
-  def purpose = column[String]("LOAN_PURPOSE")
-  def created = column[Timestamp]("CREATED")
-  def reviewed = column[Option[Timestamp]]("REVIEWED", O.Default(None))
-  def reviewedBy = column[Option[String]]("REVIEWED_BY")
-  def comments = column[Option[String]]("COMMENTS")
-  def accepted = column[Option[Boolean]] ("ACCEPTED")
-  def offerAPR = column[Option[BigDecimal]] ("OFFER_APR", O.SqlType("decimal(10,4)"))
-  def offerDate = column[Option[Timestamp]] ("OFFER_DATE", O.Default(None))
-  def offerAccepted = column[Option[Timestamp]] ("OFFER_ACCEPTED", O.Default(None))
-  def status = column[String] ("STATUS")
-
-  val userComps = TableQuery[UserCompanyTable]
-
-  def userCoFK = foreignKey("USERCO_FK",userCoID,userComps)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
-
-  def * = (id,userCoID,amount,term,jobs,purpose,created,reviewed,reviewedBy,comments,accepted,
-  offerAPR,offerDate,offerAccepted, status) <> (LoanApplication.tupled,LoanApplication.unapply)
-}
-
-
 // need val dbConfig... otherwise implementation error
-class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider)extends HasDatabaseConfigProvider[JdbcProfile] {
+@Singleton
+class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider,
+                                   val companyDAO: CompanyDAO, val addressDAO: AddressDAO, val userDAO: UserDAO)
+                                  (implicit ec:ExecutionContext) {
+
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
+
+  import dbConfig._
+  import profile.api._
+
+  class LoanApplicationTable(tag:Tag) extends Table[LoanApplication](tag,"LOAN_APPLICATION"){
+
+    def id = column[Long]("ID", O.AutoInc, O.PrimaryKey)
+    def userCoID = column[Long]("USERCO_ID")
+    def amount = column[BigDecimal]("AMOUNT")
+    def term = column[Int]("TERM")
+    def jobs = column[BigDecimal]("JOBS_CREATED")
+    def purpose = column[String]("LOAN_PURPOSE")
+    def created = column[Timestamp]("CREATED")
+    def reviewed = column[Option[Timestamp]]("REVIEWED", O.Default(None))
+    def reviewedBy = column[Option[String]]("REVIEWED_BY")
+    def comments = column[Option[String]]("COMMENTS")
+    def accepted = column[Option[Boolean]] ("ACCEPTED")
+    def offerAPR = column[Option[BigDecimal]] ("OFFER_APR", O.SqlType("decimal(10,4)"))
+    def offerDate = column[Option[Timestamp]] ("OFFER_DATE", O.Default(None))
+    def offerAccepted = column[Option[Timestamp]] ("OFFER_ACCEPTED", O.Default(None))
+    def status = column[String] ("STATUS")
+
+    val userComps = companyDAO.userComps
+
+    def userCoFK = foreignKey("USERCO_FK",userCoID,userComps)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+
+    def * = (id,userCoID,amount,term,jobs,purpose,created,reviewed,reviewedBy,comments,accepted,
+      offerAPR,offerDate,offerAccepted, status) <> (LoanApplication.tupled,LoanApplication.unapply)
+  }
 
   val loanApplications = TableQuery[LoanApplicationTable]
-  val userComps = TableQuery[UserCompanyTable]
-  val companies = TableQuery[CompanyTable]
-  val addresses = TableQuery[AddressTable]
-  val compAddresses = TableQuery[CompanyAddressTable]
-  val users = TableQuery[UserTable]
-  val userAddresses = TableQuery[UserAddressTable]
+  val userComps = companyDAO.userComps
+  val companies = companyDAO.companies
+  val addresses = addressDAO.addresses
+  val compAddresses = addressDAO.compAddresses
+  val users = userDAO.users
+  val userAddresses = addressDAO.userAddresses
 
   def insert(loanApplication: LoanApplication): Future[Unit] = {
     db.run(loanApplications += loanApplication).map { _ => () }
@@ -172,12 +177,14 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider)e
   }
 
 
-  def loadData: Unit = {
+  def loadLoanApplicationData(): Unit = {
+    db.run(loanApplications.length.result).map{x => if (x==0){
+      Logger.info("Loading fake loan application data...")
+      loadApplication()
+    }}
+  }
 
-    Logger.info("Loading LoanApplication data...")
-    loadApplicationData
-
-        def loadApplicationData = {
+        private def loadApplication(): Unit = {
           val source = Source.fromFile("./public/sampledata/loanapplicationdata.csv")
           val sdf = new SimpleDateFormat("yyyy/MM/dd")
           val loanApplicationList = new ListBuffer[LoanApplication]()
@@ -200,14 +207,12 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider)e
           source.close()
           db.run((loanApplications ++= loanApplicationList).transactionally)
         }
-    }
 
-  def delete:Future[Unit] = {
+
+  def delete():Future[Unit] = {
     Logger.info("Deleting loanApplication data...")
     db.run(loanApplications.delete.transactionally).map{_=>Logger.info("Deleted loanApplication data.")}
   }
-
-
 
 }
 

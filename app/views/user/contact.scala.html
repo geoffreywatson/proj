@@ -1,4 +1,4 @@
-@(contactForm:Form[ContactFormData])(implicit messages: Messages, flash:Flash)
+@(userDetailsForm:Form[UserDetailsFormData])(implicit messages: Messages, flash:Flash)
 @import helper._
 @import views.fieldConstructors.BSHelpers._
 @import play.api.i18n._
@@ -9,18 +9,18 @@
 
     <div class="container-fluid">
         @form(action=routes.AppForm.insertUserDetails(), 'class->"form-horizontal"){
-            @select(field = contactForm("title"),
+            @select(field = userDetailsForm("title"),
                 options = Seq("mr"->"Mr","mrs"->"Mrs"), '_label->"Title", 'placeholder->"Title")
-            @inputText(contactForm("firstName"),
+            @inputText(userDetailsForm("firstName"),
                 args= '_label -> "First Name", 'placeholder -> "First Name" )
-            @inputText(contactForm("middleName"),
+            @inputText(userDetailsForm("middleName"),
                 args= '_label -> "Middle Name", 'placeholder ->"Middle Name")
-            @inputText(contactForm("lastName"),
+            @inputText(userDetailsForm("lastName"),
                 args = '_label -> "Last Name", 'placeholder -> "Last Name",
                 '_showConstraints -> false)
-            @inputText(contactForm("dob"),
+            @inputText(userDetailsForm("dob"),
                 args = '_label -> "DOB", 'placeholder -> "DOB", '_showConstraints->false)
-            @inputText(contactForm("nin"),
+            @inputText(userDetailsForm("nin"),
                 args = '_label -> "National Ins No", 'placeholder -> "National Ins No", '_showConstraints->false)
 
             <div class="form-group">

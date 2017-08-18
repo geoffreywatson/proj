@@ -1,90 +1,90 @@
 package services
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+import com.google.inject.Provider
 import models.{Address, CompanyAddress, UserAddress, UserCompany}
 import play.api.Logger
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import slick.driver.JdbcProfile
-import slick.driver.MySQLDriver.api._
+import play.api.db.slick.DatabaseConfigProvider
+import slick.jdbc.JdbcProfile
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
-import scala.util.Success
 
 /**
   * Created by geoffreywatson on 21/02/2017.
   */
 
-/**
-  * The Slick representation of the underlying MySQL table containing Addresses.
-  * @param tag
-  */
 
-class AddressTable(tag:Tag) extends Table[Address](tag,"ADDRESS") {
-  def id = column[Long] ("ID", O.PrimaryKey, O.AutoInc)
-  def line1 = column[String] ("LINE1")
-  def line2 = column[String] ("LINE2")
-  def line3 = column[String] ("LINE3")
-  def city = column[String] ("CITY")
-  def county = column[String] ("COUNTY")
-  def postcode = column[String] ("POSTCODE")
-  def created = column[java.sql.Timestamp] ("CREATED")
+@Singleton
+class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO: Provider[UserDAO],
+                           companyDAO: Provider[CompanyDAO])(implicit ec:ExecutionContext) {
 
-  def * = (id,line1,line2,line3,city,county,postcode, created)<>(Address.tupled,Address.unapply)
-}
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
 
+  import dbConfig._
+  import profile.api._
 
-/**
-  * A table joining Users and Addresses. Note the foreign keys with constraints onUpdate and onDelete (as in SQL
-  * and may be required to maintain referential integrity).
-  * @param tag
-  */
+  /**
+    * The Slick representation of the underlying MySQL table containing Addresses.
+    * @param tag
+    */
+  class AddressTable(tag:Tag) extends Table[Address](tag,"ADDRESS") {
+    def id = column[Long] ("ID", O.PrimaryKey, O.AutoInc)
+    def line1 = column[String] ("LINE1")
+    def line2 = column[String] ("LINE2")
+    def line3 = column[String] ("LINE3")
+    def city = column[String] ("CITY")
+    def county = column[String] ("COUNTY")
+    def postcode = column[String] ("POSTCODE")
+    def created = column[java.sql.Timestamp] ("CREATED")
 
-class UserAddressTable(tag:Tag) extends Table[UserAddress](tag, "USER_ADDRESS"){
-  def id = column[Long] ("ID", O.PrimaryKey, O.AutoInc)
-  def email = column[String] ("EMAIL")
-  def aid = column[Long] ("ADD_ID")
-
-  val users = TableQuery[UserTable]
-  val addrs = TableQuery[AddressTable]
-
-  def user = foreignKey("USER_FK", email, users)(_.email, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
-  def addr = foreignKey("ADDR_FK", aid,addrs)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
-
-  def * = (id, email, aid)<>(UserAddress.tupled, UserAddress.unapply)
-
-}
-
-/**
-  * A table joining Companies and Addresses.
-  * @param tag
-  */
-
-class CompanyAddressTable(tag:Tag) extends Table[CompanyAddress](tag, "COMPANY_ADDRESS"){
-  def id = column[Long] ("ID", O.PrimaryKey, O.AutoInc)
-  def cid = column[Long] ("CID")
-  def aid = column[Long] ("AID")
-
-  val comps = TableQuery[CompanyTable]
-  val addrs = TableQuery[AddressTable]
-
-  def comp = foreignKey("COMP_FK", cid, comps)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
-  def addr  = foreignKey("ADD_FK", aid, addrs)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
-
-  def * = (id,cid,aid)<>(CompanyAddress.tupled, CompanyAddress.unapply)
-}
+    def * = (id,line1,line2,line3,city,county,postcode, created)<>(Address.tupled,Address.unapply)
+  }
 
 
+  /**
+    * A table joining Users and Addresses. Note the foreign keys with constraints onUpdate and onDelete (as in SQL
+    * and may be required to maintain referential integrity).
+    * @param tag
+    */
 
-class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
+  class UserAddressTable(tag:Tag) extends Table[UserAddress](tag, "USER_ADDRESS"){
+    def id = column[Long] ("ID", O.PrimaryKey, O.AutoInc)
+    def email = column[String] ("EMAIL")
+    def aid = column[Long] ("ADD_ID")
+
+    def user = foreignKey("USER_FK", email, users)(_.email, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+    def addr = foreignKey("ADDR_FK", aid,addresses)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+
+    def * = (id, email, aid)<>(UserAddress.tupled, UserAddress.unapply)
+
+  }
+
+  /**
+    * A table joining Companies and Addresses.
+    * @param tag
+    */
+  class CompanyAddressTable(tag:Tag) extends Table[CompanyAddress](tag, "COMPANY_ADDRESS"){
+    def id = column[Long] ("ID", O.PrimaryKey, O.AutoInc)
+    def cid = column[Long] ("CID")
+    def aid = column[Long] ("AID")
+
+    def comp = foreignKey("COMP_FK", cid, comps)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+    def addr  = foreignKey("ADD_FK", aid, addresses)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+
+    def * = (id,cid,aid)<>(CompanyAddress.tupled, CompanyAddress.unapply)
+  }
+
 
   val addresses = TableQuery[AddressTable]
   val userAddresses = TableQuery[UserAddressTable]
   val compAddresses = TableQuery[CompanyAddressTable]
-  val userCompanies = TableQuery[UserCompanyTable]
+  val userCompanies = companyDAO.get().userComps
+  val users = userDAO.get().users
+  val comps = companyDAO.get().companies
+
 
   val insertQuery = addresses returning addresses.map(_.id) into ((addrs, id) => addrs.copy(id = id))
 
@@ -121,19 +121,35 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
 
 
 
-  def loadData = {
+  def loadAddressData():Unit = {
 
-    Logger.info("Load address data CALLED...")
+    db.run(addresses.length.result).map{ x => if(x==0) {
+      Logger.info("Loading fake address data...")
+      loadAddresses()
+      Thread.sleep(3000)
+    }}
+  }
 
-    //db.run(addresses.length.result).map{x=>if(x==0)loadAddresses}
-    loadAddresses
+  def loadUserAddressData():Unit = {
 
-    Thread.sleep(3000)
+    db.run(userAddresses.length.result).map{x=>if(x==0){
+      Logger.info("Loading fake user address data...")
+      loadUserAddress()
+    }}
+  }
 
-    //db.run(userAddresses.length.result).map{x=>if(x==0)loadUserAddress}
-    loadUserAddress
+  def loadCompanyAddressData():Unit = {
 
-    def loadAddresses:Unit = {
+    db.run(compAddresses.length.result).map{x=>if(x==0){
+      Logger.info("Loading fake company address data...")
+      loadCompanyAddress()
+
+    }}
+  }
+
+
+
+    private def loadAddresses():Unit = {
       val source = Source.fromFile("./public/sampledata/addressdata.csv")
       val addressList = new ListBuffer[Address]()
       for (line <- source.getLines().drop(1)) {
@@ -146,7 +162,7 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
       db.run((addresses ++= addressList).transactionally)
     }
 
-    def loadUserAddress = {
+    private def loadUserAddress():Unit = {
       val source = Source.fromFile("./public/sampledata/useraddressdata.csv")
       val userAddressList = new ListBuffer[UserAddress]()
       for (line <- source.getLines().drop(1)){
@@ -158,13 +174,26 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider) extends 
       db.run((userAddresses ++= userAddressList).transactionally)
 
     }
-  }
+
+    private def loadCompanyAddress():Unit = {
+     val source = Source.fromFile("./public/sampledata/companyaddressdata.csv")
+      val companyAddressList = new ListBuffer[CompanyAddress]()
+      for (line <- source.getLines().drop(1)){
+        val cols = line.split(",").map(_.trim)
+        val companyAddress = CompanyAddress(0,cols(0).toLong,cols(1).toLong)
+        companyAddressList += companyAddress
+     }
+     source.close()
+     db.run((compAddresses ++= companyAddressList).transactionally)
+    }
 
 
-  def delete:Future[Unit] ={
+
+  def delete():Future[Unit] ={
     Logger.info("Deleteing address data...")
     db.run(userAddresses.delete.transactionally).map{_=>Logger.info("UserAddress data deleted.")}
     db.run(addresses.delete.transactionally).map{_=>Logger.info("Address data deleted.")}
+    db.run(compAddresses.delete.transactionally).map{_=>Logger.info("Deleted CompanyAddress data.")}
   }
 
 }
