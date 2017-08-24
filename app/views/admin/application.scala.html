@@ -81,38 +81,24 @@
         </div>
 <div class="container-fluid">
 
-    @app.loanApplication.status match {
-        case "Accepted" => {
-            <br>
-            <hr>
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-3">
-                        <h4 style="color:blue">
-                            <p>Application Status:</p>
-                            <p>Interest Rate ("apr"):</p>
-                            <p>Reviewed On:</p>
-                            <p>Reviewed By:</p>
-                            <p>Comments:</p>
-                        </h4>
-                    </div>
-                    <div class="col-md-3">
-                        <h4 style="color:blue">
-                            <p>@app.loanApplication.status</p>
-                            <p>@java.text.NumberFormat.getPercentInstance.format(app.loanApplication.offerAPR)</p>
-                            <p>@app.loanApplication.reviewed</p>
-                            <p>@app.loanApplication.reviewedBy</p>
-                            <p>@app.loanApplication.comments</p>
-                        </h4>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="@routes.Admin.disburseLoan(app.loanApplication.id)"><button class="btn btn-danger">Disburse Loan</button></a>
+
+        @app.loanApplication.getStatus match {
+
+
+        case "Submitted" => {
+            @form(action = routes.Admin.insertReviewData(), 'class -> "form-horizontal") {
+                @textarea(reviewForm("comments"), '_label -> "Comments", 'placeholder -> "Comments", 'rows -> 5, 'cols -> 25)
+                @checkbox(reviewForm("accepted"), '_label -> "Application Accept")
+                @inputText(reviewForm("offerAPR"), '_label -> "Offer APR%")
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <button type="submit" class="btn btn-success">@Messages("Complete Review")</button>
                     </div>
                 </div>
-            </div>
-
+            }
         }
-        case "Drawndown" => {
+
+        case _ => {
             <br>
             <hr>
             <div class="container-fluid">
@@ -129,33 +115,27 @@
                     </div>
                     <div class="col-md-3">
                         <h4 style="color:blue">
-                            <p>@app.loanApplication.status</p>
-                            <p>@java.text.NumberFormat.getPercentInstance.format(app.loanApplication.offerAPR)</p>
+                            <p>@app.loanApplication.getStatus</p>
+                            <p>@java.text.NumberFormat.getPercentInstance.format(app.loanApplication.offerAPR.getOrElse(0))</p>
                             <p>@app.loanApplication.reviewed</p>
                             <p>@app.loanApplication.reviewedBy</p>
                             <p>@app.loanApplication.comments</p>
                         </h4>
                     </div>
-                    <div class="col-md-3">
-                        <a href="@routes.Admin.loanApps()"><button class="btn btn-info">View Applications</button></a>
-                    </div>
                 </div>
             </div>
-
-        }
-        case _ => {
-            @form(action = routes.Admin.insertReviewData(), 'class -> "form-horizontal") {
-                @textarea(reviewForm("comments"), '_label -> "Comments", 'placeholder -> "Comments", 'rows -> 5, 'cols -> 25)
-                @checkbox(reviewForm("accepted"), '_label -> "Application Accept")
-                @inputText(reviewForm("offerAPR"), '_label -> "Offer APR%")
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-success">@Messages("Complete Review")</button>
-                    </div>
-                </div>
-            }
         }
     }
+    @app.loanApplication.getStatus match {
+    case "Accepted" => {
+
+        <div class="col-md-3">
+            <a href="@routes.Admin.disburseLoan(app.loanApplication.id)"><button class="btn btn-danger">Disburse Loan</button></a>
+        </div>
+    }
+        case _ => {<h2>Some other case</h2>}
+    }
+
 </div>
 
 

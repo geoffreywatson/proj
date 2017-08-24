@@ -22,18 +22,53 @@ class Application @Inject() (userDao:UserDAO, userForms: UserForms, authAction: 
   extends AbstractController(cc) with I18nSupport{
 
 
+  //renders the login page. Binds data from the request to the form if some form constraint failed on last submit.
+  def login = Action.async(parse.default) { implicit request =>
+    val form = if(request.flash.get("error").isDefined) {
+      userForms.loginForm.bind(request.flash.data)
+    } else
+      userForms.loginForm
+    Future.successful(Ok(views.html.login(form)))
+  }
 
+  //tries to login a user with the data provided. Since the authentication is handled by the form object, a valid form includes
+  //authenticated user data. Add the logged in user email and the user role to the session cookie.
+  def loginUser = Action.async(parse.default) { implicit request =>
+    userForms.loginForm.bindFromRequest.fold(
+      hasErrors = { form =>
+        Future.successful(Redirect(routes.Application.login()).flashing(Flash(form.data) +
+          ("error" -> "ERROR: username or password incorrect")))
+      }, userData => {
+        val email = userData.email
+        userDao.userRole(email).map{ f => Redirect(routes.Application.index())
+          .withSession("connected" -> email, "user" -> f.getOrElse("user"))}
+      }
+    )
+  }
+
+
+  //if the user role is admin render the loan applications page, otherwise check if the user has
+  //a loan application; if so render the welcome page else render the page to start an application.
   def index = Action.async(parse.default) { implicit request =>
 
-    val user = request.session.data.get("connected").getOrElse("")
+    val user = request.session.data.getOrElse("connected", "")
+    val userRole = request.session.data.getOrElse("user", "user")
 
-    val futOption:Future[Option[(Long,String)]] = loanApplicationDAO.applicationStatus(user)
-    Await.result(futOption,Duration(1,SECONDS)) match {
-      case Some(res) => Future.successful(Ok(views.html.user.welcome(res._1,res._2,user)))
-      case None => Future.successful(Ok(views.html.index("welcome!")))
+    if (userRole == "admin") {
+      Future.successful(Redirect(routes.Admin.loanApps()))
+    } else {
+      loanApplicationDAO.applicationStatus(user).map { f: Option[(Long, String)] =>
+        f match {
+          case Some(r) => Ok(views.html.user.welcome(r._1, r._2, user))
+          case None => Ok(views.html.index("Welcome!"))
+        }
+      }
     }
-
   }
+
+
+
+
 
   def insertUser = Action.async(parse.default) { implicit request =>
     userForms.userRegForm.bindFromRequest.fold(
@@ -61,24 +96,9 @@ class Application @Inject() (userDao:UserDAO, userForms: UserForms, authAction: 
   }
 
 
-  def login = Action.async(parse.default) { implicit request =>
-    val form = if(request.flash.get("error").isDefined) {
-      userForms.loginForm.bind(request.flash.data)
-    } else
-      userForms.loginForm
-    Future.successful(Ok(views.html.login(form)))
-  }
 
-  def loginUser = Action.async(parse.default) { implicit request =>
-    userForms.loginForm.bindFromRequest.fold(
-      hasErrors = { form =>
-        Future.successful(Redirect(routes.Application.login()).flashing(Flash(form.data) +
-          ("error" -> "[LoginUser Action] username or password incorrect")))
-      }, userData => {
-        Future.successful(Redirect(routes.Application.index()).withSession("connected" -> userData.email))
-      }
-    )
-  }
+
+
 
   /**
     * Check if a user is already registered. The boolean result is turned into

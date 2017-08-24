@@ -45,7 +45,7 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
 
 
   /**
-    * A table joining Users and Addresses. Note the foreign keys with constraints onUpdate and onDelete (as in SQL
+    * A table joining Users and Addresses. The foreign keys have constraints- onUpdate and onDelete (as in SQL
     * and may be required to maintain referential integrity).
     * @param tag
     */
@@ -63,7 +63,7 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
   }
 
   /**
-    * A table joining Companies and Addresses.
+    * A table joining Companies and Addresses with constraints on the foreign keys.
     * @param tag
     */
   class CompanyAddressTable(tag:Tag) extends Table[CompanyAddress](tag, "COMPANY_ADDRESS"){
@@ -86,25 +86,27 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
   val comps = companyDAO.get().companies
 
 
+  // the insert query to get back a db generated id.
   val insertQuery = addresses returning addresses.map(_.id) into ((addrs, id) => addrs.copy(id = id))
 
 
-
-
   /**
-    * Insert a UserAddress. In this case the id is not required so the db insert operation is fully asynchronous
-    * i.e. non-blocking.
-    *
-    * @param address ,user
+    * First insert the address and get back the db generated id. Use the id along with user email to create a record
+    * in the join table user_address.
+    * @param address
+    * @param user
     * @return
     */
-  def insertUserAddress(address: Address, user: String): Unit = {
+  def insertUserAddress(address: Address, user: String): Future[Unit] = {
     val action = insertQuery += address
     val futureAddress = db.run(action)
-    futureAddress.onSuccess {
-      case addrs => db.run(userAddresses += UserAddress(0, user, addrs.id)).map { _ => () }
-    }
+    futureAddress.map{x => db.run(userAddresses += UserAddress(0,user,x.id)).map{_=>()}}
   }
+
+
+
+
+
 
   def insertCompanyAddress(address: Address, user: String): Unit = {
     val futureUserCompany: Future[Option[UserCompany]] = db.run(userCompanies.filter(_.email === user).result.headOption)
@@ -124,7 +126,7 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
   def loadAddressData():Unit = {
 
     db.run(addresses.length.result).map{ x => if(x==0) {
-      Logger.info("Loading fake address data...")
+      Logger.info("Loading address data...")
       loadAddresses()
       Thread.sleep(3000)
     }}
@@ -133,7 +135,7 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
   def loadUserAddressData():Unit = {
 
     db.run(userAddresses.length.result).map{x=>if(x==0){
-      Logger.info("Loading fake user address data...")
+      Logger.info("Loading user address data...")
       loadUserAddress()
     }}
   }
@@ -141,7 +143,7 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
   def loadCompanyAddressData():Unit = {
 
     db.run(compAddresses.length.result).map{x=>if(x==0){
-      Logger.info("Loading fake company address data...")
+      Logger.info("Loading company address data...")
       loadCompanyAddress()
 
     }}
@@ -190,10 +192,10 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
 
 
   def delete():Future[Unit] ={
-    Logger.info("Deleteing address data...")
-    db.run(userAddresses.delete.transactionally).map{_=>Logger.info("UserAddress data deleted.")}
-    db.run(addresses.delete.transactionally).map{_=>Logger.info("Address data deleted.")}
-    db.run(compAddresses.delete.transactionally).map{_=>Logger.info("Deleted CompanyAddress data.")}
+    Logger.info("deleteing address data...")
+    db.run(userAddresses.delete.transactionally).map{_=>Logger.info("userAddress data deleted.")}
+    db.run(addresses.delete.transactionally).map{_=>Logger.info("address data deleted.")}
+    db.run(compAddresses.delete.transactionally).map{_=>Logger.info("companyAddress data deleted.")}
   }
 
 }

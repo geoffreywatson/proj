@@ -12,7 +12,7 @@
             <div class="col-md-3">
         <p>Send offer to: </p>
         <p>Name: </p>
-        <p>Business Name:</p>
+        <p>Business Name: </p>
         <p>Loan Amount: </p>
         <p>Interest Rate: </p>
         <p>Term: </p>
@@ -25,7 +25,7 @@
         <p>@email._2</p>
         <p>@loanOffer.businessName</p>
         <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.loanValue)</p>
-        <p>@("%04.2f".format(loanOffer.offerAPR * 100))%</p>
+        <p>@java.text.NumberFormat.getPercentInstance.format(loanOffer.offerAPR * 100)</p>
         <p>@loanOffer.term Months</p>
         <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.getPmt)</p>
         <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalToPay)</p>

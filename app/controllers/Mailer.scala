@@ -11,11 +11,10 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 class Mailer @Inject() (mailer:MailerClient, authAction:AuthAction, cc:ControllerComponents) extends AbstractController(cc){
 
   /**
-    * send an email to a user.
+    * send an email notification to a user. The email contains a button which when pressed would navigate to the login page
+    * of the application. After the email is sent redirect to the loan applications page.
     * @return
     */
-
-
 
   def sendOfferAccept(user:String, fullname:String) = authAction{
 

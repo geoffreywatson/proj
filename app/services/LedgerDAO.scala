@@ -163,7 +163,6 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
           accrueInterest(loanId, entryDate, p._2 match {
             case Some(r) => r
           })
-          loanApplicationDAO.get().updateStatus(loanId, "Drawndown")
       }
     }
   }
@@ -376,7 +375,7 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
       }
       source.close()
       db.run((journalEntries ++= jeList).transactionally).map{_=>db.run(journalEntries.length.result)
-        .map{i=>Logger.info(s"JournalLine data load complete ${i} rows loaded.")}}
+        .map{i=>Logger.info(s"JournalEntry data load complete ${i} rows loaded.")}}
 
     }
 
@@ -390,7 +389,7 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
       }
       source.close()
       db.run((journalLines ++= jlList).transactionally).map{_ => db.run(journalLines.length.result)
-        .map{i=>Logger.info(s"JournalEntry data load complete ${i} rows loaded.")}}
+        .map{i=>Logger.info(s"JournalLine data load complete ${i} rows loaded.")}}
     }
 
     //wipe db.

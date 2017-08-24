@@ -1,7 +1,7 @@
 import java.time.LocalDate
 
 import models._
-import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play._
 
 /**
   * Created by geoffreywatson on 01/02/2017.

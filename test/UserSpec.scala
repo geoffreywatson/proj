@@ -1,7 +1,7 @@
 import javax.inject.Inject
 
 import models.UserForms
-import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play._
 import services.UserDAO
 
 /**

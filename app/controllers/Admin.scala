@@ -20,25 +20,40 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
                       authAction: AuthAction, cc:ControllerComponents)
   extends AbstractController(cc) with I18nSupport{
 
-  //obtain a list of loan applications from the DAO and then render in a view
+
+  /**
+    * Obtain a list of loan applications from the DAO and then render the result set in a view.
+    * @return
+    */
   def loanApps = authAction.async(parse.default) { implicit request =>
-   val fut:Future[Seq[(Timestamp,Long,String,String,BigDecimal,Int, String)]] = loanApplicationDAO.fullView
+   val fut:Future[Seq[(Timestamp,Long,String,String,BigDecimal,Int, String)]] = loanApplicationDAO.listApps
    fut.map(f => Ok(views.html.admin.applications(f)))
   }
 
 
+  /**
+    * Obtain a complete Application using the loan application id to form the join on the tables in the DAO. Render the
+    * complete application in a view along with a review form to review the application. Add the loan id to the session cookie.
+    * @param id
+    * @return
+    */
   def showApplication(id:Long) = authAction.async(parse.default) { implicit request =>
-      val completeApplication:CompleteApplication = loanApplicationDAO.reviewApp(id)
     val form = if(request.flash.get("error").isDefined){
       loanApplicationForms.reviewForm.bind(request.flash.data)
     } else {
       loanApplicationForms.reviewForm
     }
-      Future.successful(Ok(views.html.admin.application(completeApplication, form)).withSession(
-        request.session + ("loanID" -> id.toString)))
+    loanApplicationDAO.reviewApp(id).map{f => f.getOrElse(throw new IllegalArgumentException(
+      "Could not form CompleteApplication"))}.map{ x => Ok(views.html.admin.application(x, form)).withSession(
+      request.session + ("loanID" -> id.toString))}
   }
 
 
+  /**
+    *Insert application review data into the loan_application table. If the application was accepted then proceed to
+    * prepare offer otherwise view loan apps. Remove the loan id from the session cookie.
+    * @return
+    */
   def insertReviewData = authAction.async(parse.default) { implicit request =>
 
     val loanId = request.session.data.getOrElse("loanID","0").toLong
@@ -63,14 +78,24 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
       }
 
 
+  /**
+    * Use the loan id to get the details required to email the customer then render the email notification page.
+    * @param loanId
+    * @return
+    */
   def prepareOffer(loanId:Long) = authAction.async(parse.default) { implicit request =>
     val preparedOffer = loanApplicationDAO.prepareOffer(loanId)
     val prepareEmail = loanApplicationDAO.prepareEmail(loanId)
     Future.successful(Ok(views.html.admin.prepareoffer(preparedOffer,prepareEmail)))
   }
 
+  /**
+    *
+    * @param loanId
+    * @return
+    */
   def viewOffer(loanId:Long) = authAction.async(parse.default) { implicit request =>
-    val preparedOffer = loanApplicationDAO.prepareOffer(loanId)
+    val preparedOffer:PreparedOffer = loanApplicationDAO.prepareOffer(loanId)
     Future.successful(Ok(views.html.user.viewoffer(preparedOffer)))
   }
 

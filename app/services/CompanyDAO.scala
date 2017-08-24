@@ -70,10 +70,8 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
   def insert(company:Company, user:String): Unit={
     val action = insertCompQuery += company
     val futureCompany:Future[Company] = db.run(action)
-    futureCompany.onSuccess{
-      case comp => db.run(userComps += UserCompany(0,user,comp.id,new Timestamp(System.currentTimeMillis())))
-    }
-  }
+    futureCompany.map{x:Company => db.run(userComps += UserCompany(0,user,x.id,new Timestamp(System.currentTimeMillis())))
+  }}
 
   def userCoID(user:String): Long={
     val futureUserCompany: Future[Option[UserCompany]] = db.run(userComps.filter(_.email===user).result.headOption)
@@ -86,18 +84,18 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
   }
 
 
-  //load fake company data from csv file if there is no data in db.
+  //load fake company data from csv file to the empty db.
   def loadCompanyData():Unit = {
     db.run(companies.length.result).map { x => if (x == 0) {
-        Logger.info("Loading fake company data...")
+        Logger.info("Loading company data...")
         loadCompany()
       }}
   }
 
-  //load fake user_company data from csv file if there is no data in db.
+  //load fake user_company data from csv file to the empty db.
   def loadUserCompanyData():Unit = {
     db.run(userComps.length.result).map { x => if (x==0) {
-      Logger.info("Loading fake user_company data...")
+      Logger.info("Loading user_company data...")
       loadUserCompany()
     }}
   }
@@ -129,8 +127,8 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
     }
 
   def delete:Future[Unit] = {
-    Logger.info("Begin delete company data...")
-    db.run(userComps.delete.transactionally).map{_=>Logger.info("Deleted UserCompany data.")}
-    db.run(companies.delete.transactionally).map{_=>Logger.info("Deleted Company data.")}
+    Logger.info("deleting company data...")
+    db.run(userComps.delete.transactionally).map{_=>Logger.info("userCompany data deleted.")}
+    db.run(companies.delete.transactionally).map{_=>Logger.info("company data deleted.")}
   }
 }

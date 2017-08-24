@@ -29,7 +29,7 @@ class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecyc
   // This code is called when the application starts.
   private val start: Instant = clock.instant
   Logger.info(s"ApplicationTimer demo: Starting application at $start.")
-  Logger.info(s"Loading fake data into database...")
+  Logger.info(s"Starting to load fake data into database...")
   userDAO.get().loadUserData()
   addressDAO.get().loadAddressData()
   addressDAO.get().loadUserAddressData()

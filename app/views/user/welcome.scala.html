@@ -6,7 +6,7 @@
 
     <div class="container">
         @status match {
-            case "DECLINE" => {<h2>@messages("application.decline")</h2>}
+            case "Decline" => {<h2>@messages("application.decline")</h2>}
             case "Approved" => {
                 <div class="container">
                     <h2>@messages("application.approve")</h2>
@@ -19,6 +19,7 @@
                 }
             case "Submitted" => {<h2>@messages("application.submitted")</h2>}
             case "Accepted" => {<h2>@messages("application.accepted")</h2>}
+            case _ => {<h2>The left over case </h2>}
         }
     </div>
 }

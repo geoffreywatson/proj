@@ -3,13 +3,15 @@
 # ~~~~
 
 
-GET     /                           controllers.Application.index
+GET     /                           controllers.Application.login
 
 GET     /login                      controllers.Application.login
 
 GET     /register                   controllers.Application.register
 
-GET     /applications               controllers.Admin.loanApps
+GET     /index                      controllers.Application.index
+
+GET     /admin/applications         controllers.Admin.loanApps
 
 GET     /contact                    controllers.AppForm.contactInfo
 
@@ -25,17 +27,17 @@ GET     /companyaddress             controllers.AppForm.companyAddress
 
 GET     /application                controllers.AppForm.application
 
-GET     /showapplication/:id        controllers.Admin.showApplication(id:Long)
+GET     /admin/showapplication/:id  controllers.Admin.showApplication(id:Long)
 
-GET     /prepareoffer/:id           controllers.Admin.prepareOffer(id:Long)
+GET     /admin/prepareoffer/:id     controllers.Admin.prepareOffer(id:Long)
 
-GET     /sendofferaccept/:email/:fullname     controllers.Mailer.sendOfferAccept(email:String,fullname:String)
+GET     /admin/sendofferaccept/:email/:fullname     controllers.Mailer.sendOfferAccept(email:String,fullname:String)
 
-GET     /viewoffer/:id              controllers.Admin.viewOffer(id:Long)
+GET     /admin/viewoffer/:id        controllers.Admin.viewOffer(id:Long)
 
-GET     /acceptoffer/:id            controllers.Admin.acceptOffer(id:Long)
+GET     /admin/acceptoffer/:id      controllers.Admin.acceptOffer(id:Long)
 
-GET     /disburseloan/:id           controllers.Admin.disburseLoan(id:Long)
+GET     /admin/disburseloan/:id     controllers.Admin.disburseLoan(id:Long)
 
 GET     /admin/loanbook             controllers.Admin.loanBook
 

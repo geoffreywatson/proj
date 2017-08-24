@@ -53,8 +53,10 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider)(implicit e
 
   def findByEmail(email:String): Future[Option[User]] = db.run(users.filter(_.email===email).result.headOption)
 
-  def insert(usertemplate:User): Future[Unit] = db.run(users += usertemplate).map{_ => ()}
+  def insert(user:User): Future[Unit] = db.run(users += user).map{_ => ()}
 
+
+  //insert user details into the existing user record. Equivalent to SQL UPDATE command.
   def update(email:String, userData:UserDetailsFormData): Future[Unit] = db.run(users.filter(_.email===email)
     .map(x => (x.title,x.firstName,x.middleName,x.lastName, x.dob, x.nin))
     .update(Some(userData.title),Some(userData.firstName),Some(userData.middleName),
@@ -66,10 +68,14 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider)(implicit e
   def validateUser(email:String,password:String): Future[Boolean] = db.run(users.filter(
     user => user.email===email && user.pswdHash === password.hashCode).exists.result)
 
+  def userRole(email:String):Future[Option[String]] = {
+    db.run(users.filter(_.email===email).map(_.role).result.headOption)
+  }
+
 
   def loadUserData():Unit  = {
 
-    Logger.info("Loading User data...")
+    Logger.info("Loading user data...")
 
     db.run(users.length.result).map{x => if(x==0) loadUser()}
 
@@ -93,7 +99,7 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider)(implicit e
   }
 
   def delete:Future[Unit] ={
-    Logger.info("Deleteing User data...")
-    db.run(users.delete.transactionally).map{_=>Logger.info("Deleted User data.")}
+    Logger.info("deleteing User data...")
+    db.run(users.delete.transactionally).map{_=>Logger.info("user data deleted.")}
   }
 }

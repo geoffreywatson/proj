@@ -23,10 +23,12 @@ class ExampleFilter @Inject()(
   override def apply(nextFilter: RequestHeader => Future[Result])
            (requestHeader: RequestHeader): Future[Result] = {
     // Run the next filter in the chain. This will call other filters
-    // and eventually call the action. Take the result and modify it
-    // by adding a new header.
-    nextFilter(requestHeader).map { result =>
-      result.withHeaders("X-ExampleFilter" -> "foo")
+    // and eventually call the action.
+    val userType = requestHeader.session.get("user").getOrElse("")
+    if (userType != "admin" && requestHeader.path.startsWith("/admin")){
+      Future.successful(Results.Forbidden("Forbidden -- ACCESSING ADMIN AREA WITHOUT ADMIN ROLE"))
+    } else {
+      nextFilter(requestHeader)
     }
   }
 
