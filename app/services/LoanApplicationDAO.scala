@@ -82,7 +82,7 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider,
       x._5.postcode,x._1.amount,x._1.term,x._1.getStatus)))
   }
 
-  //same query as above but with a different signature i.e. overloaded.
+  //same query as above but with a different signature i.e. overloaded with id:Long as parameter.
   def fullJoinQuery(id: Long) = for {
     (((((((l, uc), c), ca), a), u), ua), usa) <- ((((((loanApplications.filter(_.id === id)
       join userComps on (_.userCoID === _.id))

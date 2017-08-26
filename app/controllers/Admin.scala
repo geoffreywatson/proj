@@ -117,6 +117,10 @@ class Admin @Inject()(loanApplicationDAO: LoanApplicationDAO, ledgerDAO: LedgerD
     ledgerDAO.showLoan(id).map{f => Ok(views.html.admin.showloan(f))}
   }
 
+  def accountBalances() = authAction.async(parse.default) {implicit request =>
+  ledgerDAO.accountBalances.map{f => Ok(views.html.admin.accountbalances(f))}
+  }
+
 
 
 

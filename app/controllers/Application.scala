@@ -2,7 +2,7 @@ package controllers
 
 import java.sql.Timestamp
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import models.{User, UserForms}
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
@@ -10,13 +10,13 @@ import play.api.mvc._
 import play.api.routing.JavaScriptReverseRouter
 import services.{LoanApplicationDAO, UserDAO}
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 /**
   * Created by geoffreywatson on 09/02/2017.
   */
 
+@Singleton
 class Application @Inject() (userDao:UserDAO, userForms: UserForms, authAction: AuthAction,
                              loanApplicationDAO: LoanApplicationDAO, cc:ControllerComponents)
   extends AbstractController(cc) with I18nSupport{

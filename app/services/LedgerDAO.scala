@@ -351,6 +351,24 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
   }
 
 
+  def accountBalances():Future[Seq[(Int,Option[BigDecimal])]] = {
+    val q1 = (for {
+      a <- accounts
+      jl <- journalLines
+    } yield (a, jl)).groupBy(_._2.aId)
+
+    val q2 = q1.map { case (id, group) =>
+      (id, group.map{ r => r._2.amount}.sum)
+    }
+    db.run(q2.result)
+  }
+
+  def accBal():Future[Seq[(Int,Option[BigDecimal])]] = {
+    val q1 = journalLines.groupBy(r => r.aId).map {
+      case (id,group) => (id,group.map { r => r.amount}.sum)
+    }
+    db.run(q1.result)
+  }
 
 
 //Auto-run on application startup

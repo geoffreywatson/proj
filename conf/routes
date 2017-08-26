@@ -43,6 +43,8 @@ GET     /admin/loanbook             controllers.Admin.loanBook
 
 GET     /admin/showloan/:id         controllers.Admin.showLoan(id:Long)
 
+GET     /admin/accountbalances      controllers.Admin.accountBalances
+
 POST    /reviewapp                  controllers.Admin.insertReviewData
 
 POST    /application                controllers.AppForm.insertApplication

@@ -1,0 +1,43 @@
+@(accounts:Seq[(Int,Option[BigDecimal])])(implicit flash: Flash, messages: Messages)
+
+
+@admin.admintemplate("Account balances"){
+
+    <div class="container">
+        <h2>Account Balances</h2>
+        <br>
+        <table class="table table-striped">
+            <tr>
+                <th>Account ID</th>
+                <th>Debit</th>
+                <th>Credit</th>
+            </tr>
+                @for(a <- accounts){
+                    <tr>
+                        <td><a href="#">@a._1</a></td>
+                        <td>@a._2.getOrElse(BigDecimal(0)) match {
+                            case x if x > 0 => {@java.text.NumberFormat.getCurrencyInstance.format(x) }
+                            case _ => {-}
+                        }
+                        <td>@a._2.getOrElse(BigDecimal(0)) match {
+                            case x if x < 0 => {@java.text.NumberFormat.getCurrencyInstance.format(x * -1) }
+                            case _ => {-}
+                        }
+                        </td>
+                    </tr>
+                }
+            <tr>
+                <th>TOTAL</th>
+                <th>@java.text.NumberFormat.getCurrencyInstance.format(accounts.map(_._2).flatten.filter
+                        (_>BigDecimal(0)).fold(BigDecimal(0))(_+_))
+
+                </th>
+                <th>@java.text.NumberFormat.getCurrencyInstance.format(accounts.map(_._2).flatten.filter
+                        (_<BigDecimal(0)).fold(BigDecimal(0))(_+_) * -1)
+
+                </th>
+            </tr>
+        </table>
+    </div>
+
+}
