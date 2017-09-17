@@ -9,10 +9,13 @@
     <h2>Loan requirements...</h2>
     <br>
     @form(action=routes.AppForm.insertApplication(), 'class->"form-horizontal"){
-      @inputText(applicationForm("amount"), args='_label->"Loan Amount")
-      @inputText(applicationForm("term"))
-      @inputText(applicationForm("jobsCreated"))
-      @inputText(applicationForm("loanPurpose"))
+      @inputText(applicationForm("amount"), args='_label->"Loan Amount",
+        'placeholder->"An amount between £500 - £100,000", '_showConstraints->false)
+      @inputText(applicationForm("term"), args='_label->"Term (months)",'placeholder->"Min 6 months", '_showConstraints->false)
+      @inputText(applicationForm("jobsCreated"), args='_label->"Jobs To be Created",
+        'placeholder->"Jobs to be Created", '_showConstraints->false)
+      @inputText(applicationForm("loanPurpose"), args='_label->"Loan Purpose",
+        'placeholder->"Loan Purpose", '_showConstraints->false)
       <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
           <button type="submit" class="btn btn-success">@Messages("application.submit")</button>

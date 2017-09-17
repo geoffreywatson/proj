@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 
 
-case class LoanApplication(id:Long, uCoID:Long,amount:BigDecimal,term:Int,jobsCreated:BigDecimal,
+case class LoanApplication (id:Long, uCoID:Long,amount:BigDecimal,term:Int,jobsCreated:BigDecimal,
                            loanPurpose:String,created:Timestamp, reviewed:Option[Timestamp], reviewedBy:Option[String],
                            comments:Option[String], approved:Option[Boolean], offerAPR:Option[BigDecimal],
                            offerDate:Option[Timestamp], offerAccepted:Option[Timestamp]){
@@ -52,8 +52,7 @@ case class LoanOffer (offerAPR:BigDecimal,created:Timestamp,offerAccepted:Timest
 
 case class LoanApplicationData(amount:BigDecimal, term:Int, jobsCreated:BigDecimal, loanPurpose:String)
 
-class LoanApplicationForms @Inject()(){
-
+class LoanApplicationForms {
 
   val form = Form(
     mapping(

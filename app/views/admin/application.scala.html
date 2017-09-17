@@ -98,11 +98,43 @@
             }
         }
 
+        case "Accepted" => {
+            <br>
+            <hr>
+            <div class="container-fluid">
+                <h3>@app.loanApplication.getStatus.toString</h3>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h4 style="color:blue">
+                            <p>Application Status:</p>
+                            <p>Interest Rate ("apr"):</p>
+                            <p>Reviewed On:</p>
+                            <p>Reviewed By:</p>
+                            <p>Comments:</p>
+                        </h4>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 style="color:blue">
+                            <p>@app.loanApplication.getStatus</p>
+                            <p>@java.text.NumberFormat.getPercentInstance.format(app.loanApplication.offerAPR.getOrElse(0))</p>
+                            <p>@app.loanApplication.reviewed</p>
+                            <p>@app.loanApplication.reviewedBy</p>
+                            <p>@app.loanApplication.comments</p>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <a href="@routes.Admin.disburseLoan(app.loanApplication.id)">
+                <button class="btn btn-danger">Disburse Loan</button>
+            </a>
+        }
+
         case _ => {
             <br>
             <hr>
             <div class="container-fluid">
-                <h3>Loan Disbursed</h3>
+                <h3>@app.loanApplication.getStatus.toString</h3>
                 <div class="row">
                     <div class="col-md-3">
                         <h4 style="color:blue">
@@ -126,21 +158,8 @@
             </div>
         }
     }
-    @app.loanApplication.getStatus match {
-    case "Accepted" => {
-
-        <div class="col-md-3">
-            <a href="@routes.Admin.disburseLoan(app.loanApplication.id)"><button class="btn btn-danger">Disburse Loan</button></a>
-        </div>
-    }
-        case _ => {<h2>Some other case</h2>}
-    }
 
 </div>
-
-
-
-
 
     </div>
 }

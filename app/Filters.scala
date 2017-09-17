@@ -1,9 +1,9 @@
 import javax.inject._
+
 import play.api._
 import play.api.http.HttpFilters
 import play.api.mvc._
-
-import filters.ExampleFilter
+import filters.AdminFilter
 
 
 //This file has been left unchanged from the original Play distrubution and therefore does not
@@ -19,19 +19,19 @@ import filters.ExampleFilter
  * the `application.conf` configuration file.
  *
  * @param env Basic environment settings for the current application.
- * @param exampleFilter A demonstration filter that adds a header to
+ * @param adminFilter A demonstration filter that adds a header to
  * each response.
  */
 @Singleton
 class Filters @Inject() (
   env: Environment,
-  exampleFilter: ExampleFilter) extends HttpFilters {
+  adminFilter: AdminFilter) extends HttpFilters {
 
   override val filters = {
     // Use the example filter if we're running development mode. If
     // we're running in production or test mode then don't use any
     // filters at all.
-    if (env.mode == Mode.Dev) Seq(exampleFilter) else Seq.empty
+    if (env.mode == Mode.Dev) Seq(adminFilter) else Seq.empty
   }
 
 }

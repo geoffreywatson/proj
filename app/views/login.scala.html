@@ -6,8 +6,6 @@
 @user.usertemplate(Messages("application.login")){
 
     <div class="container-fluid">
-
-
         @form(action=routes.Application.loginUser(), 'class->"form-horizontal"){
             @inputText(loginForm("email"), args= '_label ->"Email", 'placeholder -> "Email", 'type->"email",
             '_showConstraints->false, '_id->"loginEmail", 'id->"loginEmail")
@@ -31,9 +29,5 @@
                 </div>
             </div>
         }
-
     </div>
-
-
-
 }

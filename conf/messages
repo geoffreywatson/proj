@@ -3,12 +3,14 @@ application.signin=Sign in
 application.register=register
 application.login=login
 application.welcome=Welcome!
-application.decline=Your application for finance was declined, sorry.
+application.decline=Your application for finance was declined.
 application.approve=Congratulations, your application for finance has been approved!
+application.submit=Submit Application
 application.submitted=Thank you for your application, you will will receive an email \
   notification once your applicaton has been reveiwed.
 application.accept=I have read the terms and conditions. Please advance the funds ASAP.
 application.accepted=Thank you. You will receive your loan in a few days.
 appform.next=Next
-appform.intro=The process will take about 10 minutes to complete
+
+
 

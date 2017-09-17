@@ -8,21 +8,11 @@
 @user.usertemplate(Messages("application.register")) {
 
         <div class="container-fluid">
-
-            @if(userForm.hasGlobalErrors){
-                <ul>
-                    @userForm.globalErrors.map{error =>
-                      <li>@error.message</li>
-                    }
-                </ul>
-            }
-
-
             @helper.form(action= routes.Application.insertUser(), 'class -> "form-horizontal"){
                 @inputText(userForm("email"), args = '_id->"email", 'type->"email",'_label->"Email",
-                    '_showConstraints->false, '_showErrors->true, 'placeholder->"Email")(textInputGroup,implicitly)
+                    '_showConstraints->false, '_showErrors->true, 'placeholder->"Email")
                 @inputPassword(userForm("password"), args = '_id->"password", 'type->"password",
-                    '_label->"Password", '_showConstraints->false, '_showErrors->true, 'placeholder->"Password")(textInputGroup,implicitly)
+                    '_label->"Password", '_showConstraints->false, '_showErrors->true, 'placeholder->"Password")
                 @inputPassword(userForm("confirmPswd"), args= '_id->"confirmPswd", 'type->"password",
                     '_label->"Re-enter password", '_showConstraints->false, '_showErrors->true,
                     'placeholder->"Re-enter password")
@@ -32,10 +22,7 @@
                     </div>
                 </div>
             }
-
         </div>
-
-
 }
 
 

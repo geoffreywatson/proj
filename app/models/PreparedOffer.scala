@@ -16,5 +16,4 @@ case class PreparedOffer(loanAppId:Long,businessName:String,loanValue:BigDecimal
   val totalInterestToPay = {
     totalToPay - loanValue
   }
-
 }

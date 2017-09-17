@@ -9,20 +9,23 @@
         <h2>Your business...</h2>
         <br>
         @form(action=routes.AppForm.insertCompany(), 'class->"form-horizontal"){
-            @inputText(companyForm("name"), args='_label->"Company Name")
-            @inputText(companyForm("tradingDate"))
-            @inputText(companyForm("sector"))
-            @inputText(companyForm("ftJobs"))
-            @inputText(companyForm("ptJobs"))
-            @inputText(companyForm("legalForm"))
-            @inputText(companyForm("url"))
+            @inputText(companyForm("name"), args='_label->"Company Name",
+                'placeholder->"Company Name", '_showConstraints->false)
+            @inputText(companyForm("tradingDate"), args='_label->"Trading Date",
+                'placeholder->"yyyy-MM-dd", '_showConstraints->false)
+            @inputText(companyForm("sector"), args='_label->"Sector",'placeholder->"Sector", '_showConstraints->false)
+            @inputText(companyForm("ftJobs"), args='_label->"Full-Time Jobs",'placeholder->"Full-time jobs at company",
+                '_showConstraints->false)
+            @inputText(companyForm("ptJobs"), args='_label->"Part-Time Jobs", 'placeholder->"Part-time jobs at company",
+                '_showConstraints->false)
+            @inputText(companyForm("legalForm"), args='_label->"Legal Form", 'placeholder->"e.g. LTD, LLP",
+                '_showConstraints->false)
+            @inputText(companyForm("url"), args='_label->"url",'placeholder->"url")
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
-                    <button type="submit" class="btn btn-success">@Messages("application.next")</button>
+                    <button type="submit" class="btn btn-success">@Messages("appform.next")</button>
                 </div>
             </div>
-
         }
-
     </div>
 }

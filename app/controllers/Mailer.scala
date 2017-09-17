@@ -4,11 +4,13 @@ import javax.inject.Inject
 
 import play.api.libs.mailer._
 import play.api.mvc.{AbstractController, ControllerComponents}
+import services.LoanApplicationDAO
 
 /**
   * Created by geoffreywatson on 31/05/2017.
   */
-class Mailer @Inject() (mailer:MailerClient, authAction:AuthAction, cc:ControllerComponents) extends AbstractController(cc){
+class Mailer @Inject() (mailer:MailerClient, authAction:AuthAction, cc:ControllerComponents,
+                        loanApplicationDAO: LoanApplicationDAO) extends AbstractController(cc){
 
   /**
     * send an email notification to a user. The email contains a button which when pressed would navigate to the login page
@@ -23,7 +25,7 @@ class Mailer @Inject() (mailer:MailerClient, authAction:AuthAction, cc:Controlle
     val email = Email(
       "Important For You",
       "Applications <applications@email.com>",
-      Seq(" <" + user + ">"),
+      Seq("<" + user + ">"),
       bodyText = Some("a text message"),
       bodyHtml = Some(s"""<html><head>
                     <title>@title</title>
@@ -50,6 +52,7 @@ class Mailer @Inject() (mailer:MailerClient, authAction:AuthAction, cc:Controlle
 
     )
     val id = mailer.send(email).toString + " Sent OK"
+    loanApplicationDAO.updateStatusOfferSent(user)
     Redirect(routes.Admin.loanApps()).flashing("success" -> id)
 
   }

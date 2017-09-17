@@ -12,22 +12,23 @@ import slick.lifted.TableQuery
 object FinOps {
 
   /**
-    *
+    *An implemenation of the Annuity Formula. This formula calculates a regular payment amount for a loan of PV,
+    * for term months carrying interest at offerAPR.
     * @param PV
     * @param term
     * @param offerAPR
     * @return
     */
   def pmtAmount(PV:BigDecimal,term:Int,offerAPR:BigDecimal):BigDecimal = {
-
     val r = offerAPR/12
     val n = term
-
      (r * PV) / ( 1 - (1 + r).pow(-n))
   }
 
   /**
-    *
+    *A schedule of payment dates starting with the drawdown date. The day of month of the drawdown is maintained
+    * as far as possible for each payment date, provided the day does not fall on a weekend or is greater than the
+    * length of the month (in which case the last day of the month is selected if not a weekend, else Friday before).
     * @param specDate
     * @param term
     * @return
@@ -81,13 +82,15 @@ object FinOps {
     * @param accInt
     * @return
     */
-  private def lineFactory(date:LocalDate,obal:BigDecimal,PV:BigDecimal,pmtAmount:BigDecimal,accInt:BigDecimal):AmortizationLine={
+  private def lineFactory(date:LocalDate,obal:BigDecimal,PV:BigDecimal,pmtAmount:BigDecimal,
+                          accInt:BigDecimal):AmortizationLine={
     val ebal = obal + PV + accInt - pmtAmount
     AmortizationLine(date, obal, PV, accInt, -pmtAmount, ebal)
   }
 
   /**
-    * Get a list of AmortizationLine between two dates.
+    * Get a list of AmortizationLine between two dates. Daily interest is accumulated and then compounded into an
+    * AmortizationLine at the end of the period.
     * @param obal
     * @param pmt
     * @param apr
@@ -95,17 +98,19 @@ object FinOps {
     * @param end
     * @return
     */
-  private def interestChgPeriod(obal:BigDecimal,pmt:BigDecimal,apr:BigDecimal,start:LocalDate,end:LocalDate):List[AmortizationLine]={
-    def next(dailySched:List[AmortizationLine],accInt:BigDecimal):List[AmortizationLine] = ChronoUnit.DAYS.between(dailySched.head.date,end) match {
+  private def interestChgPeriod(obal:BigDecimal,pmt:BigDecimal,apr:BigDecimal,
+                                start:LocalDate,end:LocalDate):List[AmortizationLine]={
+    def next(dailySched:List[AmortizationLine],accInt:BigDecimal):List[AmortizationLine] =
+      ChronoUnit.DAYS.between(dailySched.head.date,end) match {
       case 1 => (lineFactory(dailySched.head.date.plusDays(1), dailySched.head.ebal,0,pmt,accInt) :: dailySched).reverse
-      case _ => next(lineFactory(dailySched.head.date.plusDays(1), dailySched.head.ebal,0,0,0) :: dailySched, accInt + dailySched.head.ebal * apr/365)
+      case _ => next(lineFactory(dailySched.head.date.plusDays(1), dailySched.head.ebal,0,0,0) :: dailySched,
+        accInt + dailySched.head.ebal * apr/365)
     }
     next(lineFactory(start, obal, 0, 0, 0) :: List[AmortizationLine](), obal * apr/365)
   }
 
-
   /**
-    *
+    *Generate a profile amortization schedule for a loan.
     * @param spec
     * @param PV
     * @param term
@@ -115,22 +120,20 @@ object FinOps {
   def dailyAmortizationSchedule(spec:LocalDate,PV:BigDecimal,term:Int,apr:BigDecimal):List[AmortizationLine] = {
     val pmtDates = getPaymentDates(spec,term)
     val pmt = pmtAmount(PV,term,apr)
-    def next(dailySched:List[AmortizationLine], datesRemain:List[LocalDate]): List[AmortizationLine] = datesRemain match {
+    def next(dailySched:List[AmortizationLine], datesRemain:List[LocalDate]): List[AmortizationLine] =
+      datesRemain match {
       case hd :: Nil => {
-        val finalPmt = interestChgPeriod(dailySched.reverse.head.ebal, 0, apr, dailySched.reverse.head.date.plusDays(1), hd).reverse.head.ebal
-        dailySched ::: interestChgPeriod(dailySched.reverse.head.ebal, finalPmt, apr, dailySched.reverse.head.date.plusDays(1), hd)
+        val finalPmt = interestChgPeriod(dailySched.reverse.head.ebal, 0, apr,
+          dailySched.reverse.head.date.plusDays(1), hd).reverse.head.ebal
+        dailySched ::: interestChgPeriod(dailySched.reverse.head.ebal, finalPmt, apr,
+          dailySched.reverse.head.date.plusDays(1), hd)
       }
       case hd :: tl => {
-        next(dailySched ::: interestChgPeriod(dailySched.reverse.head.ebal, pmt, apr, dailySched.reverse.head.date.plusDays(1), hd), tl)
+        next(dailySched ::: interestChgPeriod(dailySched.reverse.head.ebal, pmt, apr,
+          dailySched.reverse.head.date.plusDays(1), hd), tl)
       }
       case _ => dailySched
     }
     next(lineFactory(pmtDates.head,0,PV,0,0) :: List[AmortizationLine](),pmtDates.tail)
   }
-
-
-
-
-
-
 }

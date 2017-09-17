@@ -13,9 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AuthAction @Inject() (parser:BodyParsers.Default)(implicit ec:ExecutionContext) extends ActionBuilderImpl(parser){
-
   /**
-    *
+    *The Action will only proceed if the session cookie has been set with a user.
     * @param request
     * @param block
     * @tparam A

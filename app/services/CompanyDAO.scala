@@ -66,13 +66,14 @@ class CompanyDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
 
   val insertCompQuery = companies returning companies.map(_.id) into ((comp,id) => comp.copy(id = id))
 
-
-  def insert(company:Company, user:String): Unit={
+  //insert a company.
+  def insert(company:Company, user:String): Future[Unit]={
     val action = insertCompQuery += company
     val futureCompany:Future[Company] = db.run(action)
     futureCompany.map{x:Company => db.run(userComps += UserCompany(0,user,x.id,new Timestamp(System.currentTimeMillis())))
   }}
 
+  // get the userCompany id using the email.
   def userCoID(user:String): Long={
     val futureUserCompany: Future[Option[UserCompany]] = db.run(userComps.filter(_.email===user).result.headOption)
     val userCompany = Await.result(futureUserCompany,duration.Duration(1,"seconds"))

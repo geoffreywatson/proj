@@ -23,8 +23,8 @@ import scala.concurrent.duration._
   * Created by geoffreywatson on 14/07/2017.
   */
 @Singleton
-class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loanApplicationDAO: Provider[LoanApplicationDAO],
-                           val companyDAO: Provider[CompanyDAO])
+class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider,
+                           val loanApplicationDAO: Provider[LoanApplicationDAO], val companyDAO: Provider[CompanyDAO])
                           (implicit ec: ExecutionContext) {
 
   case class LineConstructor(date:LocalDate,draw:BigDecimal,int:BigDecimal,pmt:BigDecimal)
@@ -34,7 +34,7 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
   import dbConfig._
   import profile.api._
 
-
+//Slick representation of the Account table
   class AccountTable(tag: Tag) extends Table[Account](tag, "ACCOUNT") {
 
     def id = column[Int]("ID", O.PrimaryKey)
@@ -48,17 +48,19 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
   val companies = companyDAO.get().companies
   val userComps = companyDAO.get().userComps
 
+  //check if an account number is already in use.
   def accountIdExists(id: Int): Boolean = {
     val query = accounts.filter(_.id === id).exists.result
     Await.result(db.run(query), Duration(1, SECONDS))
   }
 
-  def insertAccount(account: Account): Unit = {
+  //insert new account.
+  def insertAccount(account: Account): Future[Unit] = {
     db.run(accounts += account).map(_ => ())
   }
 
   /**
-    *
+    * Slick representation of the JournalLine table.
     * @param tag
     */
   class JournalLineTable(tag: Tag) extends Table[JournalLine](tag, "JOURNAL_LINE") {
@@ -75,7 +77,7 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     def * = (id, jeId, aId, amount, memo, laId) <> (JournalLine.tupled, JournalLine.unapply)
   }
 
-
+  //Slick representation of the JournalEntry table.
   class JournalEntryTable(tag: Tag) extends Table[JournalEntry](tag, "JOURNAL_ENTRY") {
 
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
@@ -88,9 +90,6 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
   val journalLines = TableQuery[JournalLineTable]
   val journalEntries = TableQuery[JournalEntryTable]
   val loanApplications = loanApplicationDAO.get().loanApplications
-
-
-
 
 
   /**
@@ -108,14 +107,16 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
       db.run(journalLines += JournalLine(0, id, l.accId, l.amount, l.memo, l.laId)).map(_ => ())
     }
   }
-
-
+  //Get the Company name that is associated with the given loan application id.
   def getCompanyName(lId: Long): String = {
+    //Equivalent SQL: SELECT C.Name FROM LoanApplication LA, UserCompany UC, Company C WHERE LA.ID = ?
+    // AND LA.UC_ID = UC.ID AND UC.C_ID = C.ID;
     def query(id: Long) = for {
       ((l, uc), c) <- (loanApplications.filter(_.id === id) join userComps on (_.userCoID === _.id)
         join companies on (_._2.cid === _.id))
     } yield c.name
 
+    //run the query and get the result, which will be either the company name or an empty String.
     val fut: Future[Option[String]] = db.run(query(lId).result.headOption)
     Await.result(fut, Duration(1, SECONDS)) match {
       case Some(coName) => coName
@@ -125,7 +126,10 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
 
   val insertJeQuery = journalEntries returning journalEntries.map(_.id) into ((je, id) => je.copy(id = id))
 
-  def insertJournalEntry(entryDate: LocalDate, drAcc: Int, crAcc: Int, amount: BigDecimal, memo: Option[String], lId: Option[Long]): Unit = {
+  //insert a simple two-line journal entry. The memo field consists of the company name and some detail
+  // provided in the constructor. Only non-zero amounts are inserted.
+  def insertJournalEntry(entryDate: LocalDate, drAcc: Int, crAcc: Int, amount: BigDecimal, memo: Option[String],
+                         lId: Option[Long]): Unit = {
     val memo2: String = lId match {
       case Some(id) => getCompanyName(id)
       case None => ""
@@ -150,8 +154,9 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
   }
 
   /**
-    * Disburse funds to the customer. Retrieve the company name associated with the given loanId and then construct a
-    * journal entry with the loan amount and the company name which is inserted intJournalLine.
+    * Disburse funds to the customer on the next available date. Retrieve the company name associated with the given
+    * loanId and then construct a journal entry with the loan amount and the company name. Accrue interest for the day
+    * of draw down.
     *
     * @param loanId
     */
@@ -160,16 +165,58 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     db.run(loanApplications.filter(_.id === loanId).map(x => (x.amount, x.offerAPR)).result.headOption).map { i =>
       i match {
         case Some(p) => insertJournalEntry(entryDate, 1200, 1050, p._1, Some("drawdown"), Some(loanId))
-          accrueInterest(loanId, entryDate, p._2 match {
-            case Some(r) => r
-          })
+          accrueInterest(loanId, entryDate, p._2.getOrElse(0))
       }
     }
   }
 
+  /**
+    * Accrue interest on each loan (used by the scheduled task module)
+    * @return
+    */
+  def dailyInterestAccrual:Future[Unit] = {
+    db.run(loanIds.result).map{f => for (elem <- f) {
+      accrueInterest(elem.getOrElse(0))
+    }}
+  }
 
   /**
-    *
+    * Accrue interest on the loan. If today is a compounding day, an additional JE will sweep the accrued
+    * interest balance into the loan debtor account.
+    * @param id
+    */
+  def accrueInterest(id:Long) = {
+
+    def balQuery(aid:Int) = for {
+      (jl,je) <- (journalLines.filter(c => c.aId === aid && c.laId === id)
+        join journalEntries.filter(_.entryDate <= Date.valueOf(LocalDate.now)) on (_.jeId === _.id))
+    } yield jl.amount
+
+    val (apr,term) = aprTerm(id)
+
+    val drawDownDateQuery = for {
+      (jl,je) <- (journalLines.filter(c => c.aId === 1050 && c.laId === id)
+      join journalEntries on (_.jeId === _.id))
+    } yield je.entryDate
+
+    val drawDownDate:LocalDate = Await.result(db.run(drawDownDateQuery.result.headOption),Duration(1,SECONDS))
+      .get.toLocalDate
+
+    val dueDates = FinOps.getPaymentDates(drawDownDate,term)
+
+    val interest:Future[Unit] = db.run(balQuery(1200).result).map{x => x.sum * apr}.map{x => if(x>0) insertJournalEntry(
+      LocalDate.now,1600,4000,x,Some("interest accrual"),Some(id))}.map{_=>
+
+    if (dueDates.contains(LocalDate.now)){
+      val accruedInterestBal = db.run(balQuery(1600).result).map{x => x.sum}.map{x => if(x>0) insertJournalEntry(
+        LocalDate.now,1200,1600,x,Some("compound interest"),Some(id))}.map{_=>()}
+    }
+      }
+  }
+
+  /**
+    * Accrue interest on a loan. Calculate the loan balance and then apply the daily apr. Construct a journal entry
+    * with the accrual amount, the loan id and the company name.
     * @param id
     * @param entryDate
     */
@@ -182,12 +229,17 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     } yield (jl.amount)
 
    db.run(query(id, entryDate).result).map{ x =>
-     val loanBal = (BigDecimal(0) /: x) (_+_)
+     val loanBal = (BigDecimal(0) /: x) (_+_) // fold method. Could also be simply x.sum
      if(loanBal > 0) insertJournalEntry(entryDate,1600,4000,apr/365 * loanBal,Some("interest accrual"), Some(id))
    }
   }
 
-
+  /**
+    * Generate an actual amortization schedule. First run the query to get all rows in loan debtor account 1200
+    * for the given loan id sorted in date order ascending. Use the query result to create an amortization schedule.
+    * @param id
+    * @return
+    */
   def actualAmortSched(id:Long):Future[List[AmortizationLine]]= {
     val query = (for {
       (jl, je) <- (journalLines.filter(x => x.laId === id && x.aId === 1200)
@@ -197,6 +249,11 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     }
   }
 
+  /**
+    * Ensure a List[AmortizationLine] includes consecutive days by padding-out any gaps with additional lines.
+    * @param list
+    * @return
+    */
   private def dailySched(list:List[AmortizationLine]):List[AmortizationLine]={
     def next(sched:List[AmortizationLine],remain:List[AmortizationLine]):List[AmortizationLine]= {
       val day = sched.head.date.plusDays(1)
@@ -215,6 +272,14 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     next(list.head::Nil,list.tail)
   }
 
+  /**
+    * Create an amortization schedule from journal data. This tail-recursive method consumes the input data while
+    * generating the output set which is a List[AmortizationLine]. A helper method (toLineConstructor) is used to
+    * transform the table data using an intermediate class(LineConstructor). Once all input data has been consumed,
+    * the schedule is converted into a daily schedule.
+    * @param seq
+    * @return
+    */
   private def actualSchedule(seq:Seq[(JournalLine,JournalEntry)]):List[AmortizationLine] = {
     def next(remain:List[LineConstructor],sched:List[AmortizationLine]):List[AmortizationLine] = remain match {
       case Nil => dailySched(sched.reverse)
@@ -241,14 +306,14 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
         case _ => next(remain.tail,LineConstructor(hd.date,hd.draw,hd.int,hd.pmt)::sched)
       }
     }
-    next(lines.tail,LineConstructor(lines.head.date,lines.head.draw,lines.head.int,lines.head.pmt)::List[LineConstructor]())
+    next(lines.tail,LineConstructor(lines.head.date,lines.head.draw,lines.head.int,lines.head.pmt)::
+      List[LineConstructor]())
   }
 
-
-
   /**
-    * convert a tuple of JournalLine and JournalEntry into a LineConstructor. A LineConstructor is an intermediate case class
-    * used to prepare the actual Amortization Schedule of a Loan.
+    * convert a tuple of JournalLine and JournalEntry into a LineConstructor. A LineConstructor is an
+    * intermediate case class used to prepare the actual Amortization Schedule of a Loan. This method interprets
+    * the journal data and places it in the appropriate spot in LineConstructor.
     * @param line
     * @return
     */
@@ -266,8 +331,9 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     LineConstructor(line._2.entryDate.toLocalDate,alloc._1,alloc._2,alloc._3)
   }
 
+  //generates a List of LineConstructor by consuming the input Seq obtained from the db and calling the method above
+  //to turn each line into a LineConstructor. When the input is fully consumed, consolidate the lines.
   private def toLineConstructor(lines:Seq[(JournalLine,JournalEntry)]):List[LineConstructor]={
-
     def next(remain:List[(JournalLine,JournalEntry)],sched:List[LineConstructor]):List[LineConstructor]= {
         remain match {
           case Nil => consolidate(sched)
@@ -283,6 +349,7 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     (jl, je) <- (journalLines.filter(x => x.aId === 1050 && x.memo.startsWith("drawdown"))
       join journalEntries.filter(_.entryDate <= Date.valueOf(LocalDate.now)) on (_.jeId === _.id))
   } yield jl.laId
+
 
 
   // Get the apr and term of a loan
@@ -302,6 +369,11 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     (apr, term)
   }
 
+  // check if a loan application has drawn down.
+  def hasDrawnDown(id:Long):Future[Boolean]={
+    val query = journalLines.filter(x => x.aId === 1050 && x.laId === id)
+    db.run(query.exists.result)
+  }
 
   /**
     * Generate the loan book. First get a list of all distinct loan app id's from the loan debtor account 1200.
@@ -310,10 +382,8 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
     * @return
     */
     def loanBook():List[Loan]= {
-
       import scala.collection.mutable.ListBuffer
       var listBuffer = new ListBuffer[Loan]()
-
       def createLoan(id: Long):Loan = {
         val name = getCompanyName(id)
         val actualSched = Await.result(actualAmortSched(id), Duration(1, SECONDS))
@@ -322,15 +392,8 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
         val apr = aprTerm(id)._1
         val term = aprTerm(id)._2
         val profileSched = FinOps.dailyAmortizationSchedule(drawDate, PV, term, apr)
-        if(id==10){
-          println("PROFILE SCHED...")
-          profileSched.foreach(x => Logger.debug(s" ID ${id} ${x.date} ${x.obal} ${x.drawdown} ${x.int} ${x.pmt} ${x.ebal}"))
-          println("ACTUAL SHED...")
-          actualSched.foreach(x => Logger.debug(s" ID ${id} ${x.date} ${x.obal} ${x.drawdown} ${x.int} ${x.pmt} ${x.ebal}"))
-        }
         Loan(id, name, actualSched, profileSched)
       }
-
       def loanList(ids:List[Long]):List[Loan]={
         def next(loans:List[Loan],id:List[Long]):List[Loan]= id match {
           case Nil => loans.reverse
@@ -338,49 +401,33 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
         }
         next(createLoan(ids.head)::Nil,ids.tail)
       }
-
       val ids:Seq[Option[Long]] = Await.result(db.run(loanIds.result),Duration(1,SECONDS))
-
       loanList(ids.toList.map(_.get))
-
     }
-
 
   def showLoan(id:Long):Future[List[AmortizationLine]] ={
     actualAmortSched(id)
   }
 
-
+  //group rows of journal line by account id then sum the amount column of each group
   def accountBalances():Future[Seq[(Int,Option[BigDecimal])]] = {
     val q1 = (for {
-      a <- accounts
-      jl <- journalLines
+      (a,jl) <- accounts join journalLines on (_.id === _.aId)
     } yield (a, jl)).groupBy(_._2.aId)
 
-    val q2 = q1.map { case (id, group) =>
-      (id, group.map{ r => r._2.amount}.sum)
+    val q2 = q1.map { case (id,  group) =>
+      (id, group.map{ r =>  r._2.amount}.sum)
     }
     db.run(q2.result)
   }
-
-  def accBal():Future[Seq[(Int,Option[BigDecimal])]] = {
-    val q1 = journalLines.groupBy(r => r.aId).map {
-      case (id,group) => (id,group.map { r => r.amount}.sum)
-    }
-    db.run(q1.result)
-  }
-
 
 //Auto-run on application startup
   def loadData: Unit = {
 
     Logger.info("Loading fake journal data...")
 
-    loadJournalEntryData.map{_=>loadJournalLineData.map{_=>()}}
-
+    loadJournalEntryData.map{_ => loadJournalLineData.map{_ => ()}}
     }
-
-
 
     def loadJournalEntryData:Future[Unit] = {
       val sdf = new SimpleDateFormat("yyyy/MM/dd")
@@ -394,7 +441,6 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
       source.close()
       db.run((journalEntries ++= jeList).transactionally).map{_=>db.run(journalEntries.length.result)
         .map{i=>Logger.info(s"JournalEntry data load complete ${i} rows loaded.")}}
-
     }
 
     def loadJournalLineData: Future[Unit] = {
@@ -417,7 +463,6 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
       db.run(journalEntries.delete.transactionally).map { _ => Logger.info("Journal entries Deleted.") }
       db.run(accounts.delete.transactionally).map { _ => Logger.info("Accounts Deleted.") }
     }
-
 
   /**
     * Auto-run on application startup (see services/ApplicationTimer) to add interest on each loan.
@@ -475,7 +520,7 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
       val dueDates = FinOps.getPaymentDates(drawdownDate,term)
 
       // insert the compound interest and accrued interest journals. Note- if the compound interest journal
-      // amount is 0 (i.e. it's a not a compounding day) then the journal will not be inserted owing to the
+      // amount is 0 (i.e. it's a not a compounding day) then the journal will not be inserted due to the
       // non-zero constraint in insertJournalEntry (and the same applies to the accrued interest journal).
       def insertJrnl(localDate:LocalDate,accInt:BigDecimal,interest:BigDecimal):Unit= {
         insertJournalEntry(localDate,1200,1600,accInt,Some("compound interest"),Some(id))
@@ -483,7 +528,7 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
       }
 
       /**
-        * Accrue interest on fake loan data from drawdown date to today taking into account
+        * Accrue interest on fake loan data from draw down date to today taking into account
         * payments made by the customer and compounded interest.
         * @return
         */
@@ -515,7 +560,6 @@ class LedgerDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider, val loan
       accrue()
     }
   }
-
 }
 
 

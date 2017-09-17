@@ -62,12 +62,12 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider,
   val users = userDAO.users
   val userAddresses = addressDAO.userAddresses
 
-
+  //insert a loan application
   def insert(loanApplication: LoanApplication): Future[Unit] = {
     db.run(loanApplications += loanApplication).map { _ => () }
   }
 
-  //a query that joins multiple tables together to get appropriate data for listing applications received.
+  //an applicative join query that joins multiple tables together to get appropriate data for listing applications received.
   def fullJoinQuery = for {
     (((((((l, uc), c), ca), a), u), ua), usa) <- ((((((loanApplications
       join userComps on (_.userCoID === _.id))
@@ -141,14 +141,9 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider,
     }
   }
 
-
-
-
   val appsViewQuery = for {
     (l, u) <- loanApplications join userComps on (_.userCoID === _.id)
   } yield (l.amount, u.email)
-
-
 
 
   val loanIds = for {
@@ -158,7 +153,7 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider,
   def getUser(email: String) = users.filter(_.email === email)
 
 
-  // retire this one
+  //this monadic join results in compilation errors. The applicative join above (fullJoinQuery) yields the desired result.
   def showApplicationQuery(id: Long) = for {
     (l, uc) <- loanApplications.filter(_.id === id) join userComps on (_.userCoID === _.id)
     (_, c) <- userComps join companies on (_.cid === _.id)
@@ -169,14 +164,21 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider,
   } yield (l, uc, c, ca, a, u, ua)
 
 
-
-
-
-
-
+  def updateStatusOfferSent(email:String): Future[Unit] = {
+    val query = for {
+      (uc, la) <- userComps.filter(_.email === email) join loanApplications on (_.id === _.userCoID)
+    } yield la.id
+    db.run(query.result.headOption).map { x =>
+      x match {
+        case Some(i) => db.run(loanApplications.filter(_.id===i).map(_.offerDate)
+          .update(Some(new Timestamp(System.currentTimeMillis()))))
+        case None => throw new Exception("No id found")
+      }
+    }
+  }
 
   def acceptOffer(id: Long): Future[Unit] = {
-    val query = loanApplications.filter(_.id === id).map(_.accepted).update(Some(true))
+    val query = loanApplications.filter(_.id === id).map(_.offerAccepted).update(Some(new Timestamp(System.currentTimeMillis())))
     db.run(query).map { _ => ()}
   }
 
@@ -194,9 +196,6 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider,
   def getAppIds: Future[Seq[Long]] = db.run(loanIds.result)
 
   def getAppView: Future[Seq[(BigDecimal, String)]] = db.run(appsViewQuery.result)
-
-
-
 
 
 

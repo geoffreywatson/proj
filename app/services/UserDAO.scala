@@ -1,9 +1,8 @@
 package services
 
 import java.text.SimpleDateFormat
-import javax.inject.Singleton
+import javax.inject.{Inject,Singleton}
 
-import com.google.inject.Inject
 import models.{User, UserDetailsFormData}
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
@@ -12,16 +11,13 @@ import slick.jdbc.JdbcProfile
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
-import scala.util.Success
 
 /**
   * Created by geoffreywatson on 03/02/2017.
   */
 
-
 @Singleton
 class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider)(implicit ec:ExecutionContext){
-
 
   val dbConfig = dbConfigProvider.get[JdbcProfile]
 
@@ -49,12 +45,14 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider)(implicit e
     def * = (email,pswdHash,role, title, firstName, middleName, lastName, dob, nin, created) <> (User.tupled, User.unapply)
   }
 
+  //a collection of users i.e. all rows in the USER table.
   val users = TableQuery[UserTable]
 
+  //insert a User in to the USER table.
+  def insert(user:User): Future[Unit] = db.run(users += user).map{_=>()}
+
+  //get the User record corresponding to given email (primary key lookup) if one exists.
   def findByEmail(email:String): Future[Option[User]] = db.run(users.filter(_.email===email).result.headOption)
-
-  def insert(user:User): Future[Unit] = db.run(users += user).map{_ => ()}
-
 
   //insert user details into the existing user record. Equivalent to SQL UPDATE command.
   def update(email:String, userData:UserDetailsFormData): Future[Unit] = db.run(users.filter(_.email===email)
@@ -63,22 +61,28 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider)(implicit e
       Some(userData.lastName), Some(userData.dob), Some(userData.nin)
   )).map{_ => ()}
 
+  //check if a user email already exists.
   def userExists(email:String): Future[Boolean] = db.run(users.filter(_.email===email).exists.result)
 
+  //check if a user email and password combination exists in the table (to authenticate).
   def validateUser(email:String,password:String): Future[Boolean] = db.run(users.filter(
     user => user.email===email && user.pswdHash === password.hashCode).exists.result)
 
+  //get the role type of a user email returning possibly None in the case of no record found.
   def userRole(email:String):Future[Option[String]] = {
     db.run(users.filter(_.email===email).map(_.role).result.headOption)
   }
 
 
+  //on application startup to load fake user data.
   def loadUserData():Unit  = {
 
     Logger.info("Loading user data...")
 
+    //load data only of there are no records in the USER table.
     db.run(users.length.result).map{x => if(x==0) loadUser()}
 
+    //read the csv data file and begin batch insert action.
     def loadUser():Unit = {
 
       val list:Source = Source.fromFile("./public/sampledata/userdata.csv")
@@ -94,10 +98,11 @@ class UserDAO @Inject() (val dbConfigProvider:DatabaseConfigProvider)(implicit e
         userList += user
       }
       source.close()
-      db.run((users ++= userList).transactionally)
+      db.run((users ++= userList).transactionally)//transactionally avoids table constraints that may otherwise prevent insert.
     }
   }
 
+  //delete all rows in the table. Could be used on a shutdown command.
   def delete:Future[Unit] ={
     Logger.info("deleteing User data...")
     db.run(users.delete.transactionally).map{_=>Logger.info("user data deleted.")}

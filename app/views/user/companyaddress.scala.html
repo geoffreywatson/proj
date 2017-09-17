@@ -6,15 +6,14 @@
 
 @user.usertemplate("company address") {
     <div class="container-fluid">
+        <h2>Company Address</h2>
     @form(action = routes.AppForm.insertCompanyAddress(), 'class -> "form-horizontal") {
-
-        @inputText(addrsForm("line1"), args= '_label->"Line 1", 'placeholder->"Line 1")
-        @inputText(addrsForm("line2"), args= '_label->"Line 2", 'placeholder->"Line 2")
-        @inputText(addrsForm("line3"), args= '_label->"Line 3", 'placeholder->"Line 3")
-        @inputText(addrsForm("city"), args = '_label->"City", 'placeholder->"City")
-        @inputText(addrsForm("county"), args= '_label->"County", 'placeholder->"County")
-        @inputText(addrsForm("postcode"), args= '_label->"Postcode", 'placeholder-> "Postcode")
-
+        @inputText(addrsForm("line1"), args= '_label->"Line 1", 'placeholder->"Line 1", '_showConstraints->false)
+        @inputText(addrsForm("line2"), args= '_label->"Line 2", 'placeholder->"Line 2", '_showConstraints->false)
+        @inputText(addrsForm("line3"), args= '_label->"Line 3", 'placeholder->"Line 3", '_showConstraints->false)
+        @inputText(addrsForm("city"), args = '_label->"City", 'placeholder->"City", '_showConstraints->false)
+        @inputText(addrsForm("county"), args= '_label->"County", 'placeholder->"County", '_showConstraints->false)
+        @inputText(addrsForm("postcode"), args= '_label->"Postcode", 'placeholder-> "Postcode", '_showConstraints->false)
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <button type="submit" class="btn btn-info">@Messages("appform.next")</button>

@@ -89,7 +89,6 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
   // the insert query to get back a db generated id.
   val insertQuery = addresses returning addresses.map(_.id) into ((addrs, id) => addrs.copy(id = id))
 
-
   /**
     * First insert the address and get back the db generated id. Use the id along with user email to create a record
     * in the join table user_address.
@@ -103,26 +102,21 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
     futureAddress.map{x => db.run(userAddresses += UserAddress(0,user,x.id)).map{_=>()}}
   }
 
-
-
-
-
-
-  def insertCompanyAddress(address: Address, user: String): Unit = {
-    val futureUserCompany: Future[Option[UserCompany]] = db.run(userCompanies.filter(_.email === user).result.headOption)
-    val companyID = futureUserCompany.onSuccess {
-      case Some(uc: UserCompany) => val action = insertQuery += address
-        val futureAddress = db.run(action)
-        futureAddress.onSuccess {
-          case addrs => db.run(compAddresses += CompanyAddress(0, uc.cid, addrs.id))
-        }
-      case None => new Exception("no company found")
-
+  /**
+    * First find the userComp id associated with the email. Then chain the Future: insert the address getting back the id
+    * then make the insert into CompAddresses using the two Future values (company id and address id)
+    * @param address
+    * @param user
+    * @return
+    */
+  def insertCompanyAddress(address:Address, user:String): Future[Unit] = {
+    db.run(userCompanies.filter(_.email===user).map(_.cid).result.headOption).map { cid =>
+      val action = insertQuery += address
+      db.run(action).map{f => db.run(compAddresses += CompanyAddress(0,cid.getOrElse(0),f.id))}
     }
   }
 
-
-
+  // on application startup. Load fake address data.
   def loadAddressData():Unit = {
 
     db.run(addresses.length.result).map{ x => if(x==0) {

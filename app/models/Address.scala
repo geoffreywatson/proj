@@ -8,7 +8,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 
-case class Address(id:Long,line1:String, line2:String, line3:String,city:String,county:String,postcode:String,
+case class Address(id:Long,line1:String,line2:String,line3:String,city:String,county:String,postcode:String,
                    created:java.sql.Timestamp)
 
 case class AddressData(line1:String,line2:String,line3:String,city:String,county:String,postcode:String)

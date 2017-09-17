@@ -33,9 +33,9 @@ GET     /admin/prepareoffer/:id     controllers.Admin.prepareOffer(id:Long)
 
 GET     /admin/sendofferaccept/:email/:fullname     controllers.Mailer.sendOfferAccept(email:String,fullname:String)
 
-GET     /admin/viewoffer/:id        controllers.Admin.viewOffer(id:Long)
+GET     /viewoffer/:id        controllers.Admin.viewOffer(id:Long)
 
-GET     /admin/acceptoffer/:id      controllers.Admin.acceptOffer(id:Long)
+GET     /acceptoffer/:id      controllers.Admin.acceptOffer(id:Long)
 
 GET     /admin/disburseloan/:id     controllers.Admin.disburseLoan(id:Long)
 
@@ -60,11 +60,6 @@ POST    /userdata                   controllers.Application.insertUser
 POST    /login                      controllers.Application.loginUser
 
 POST    /userdetails                controllers.AppForm.insertUserDetails
-
-# An example controller showing how to use dependency injection
-GET     /count                      controllers.CountController.count
-# An example controller showing how to write asynchronous code
-GET     /message                    controllers.AsyncController.message
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file: String)

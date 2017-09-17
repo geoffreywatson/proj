@@ -1,9 +1,6 @@
 @(preparedOffer: PreparedOffer)(implicit messages: Messages, flash: Flash)
 
-
-
     @usertemplate("offer details"){
-
 
     <div class="container">
         <h3>Offer Details</h3>
@@ -29,7 +26,7 @@
                     <p>@java.text.NumberFormat.getCurrencyInstance.format(preparedOffer.loanValue)</p>
                     <p><b>@java.text.NumberFormat.getCurrencyInstance.format(preparedOffer.getPmt)</b></p>
                     <p>@preparedOffer.term</p>
-                    <p>@("%04.2f".format(preparedOffer.offerAPR *100))%</p>
+                    <p>@java.text.NumberFormat.getPercentInstance.format(preparedOffer.offerAPR)</p>
                     <br>
                     <p>@java.text.NumberFormat.getCurrencyInstance.format(preparedOffer.totalToPay)</p>
                     <p>@java.text.NumberFormat.getCurrencyInstance.format(preparedOffer.totalInterestToPay)</p>
@@ -38,8 +35,5 @@
                 </h4>
             </div>
         </div>
-
-
-
     </div>
 }

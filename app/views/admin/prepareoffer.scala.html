@@ -5,7 +5,6 @@
 
     <div class="container">
             <h2>Make Offer</h2>
-
         <br>
 
         <div class="row">
@@ -25,12 +24,11 @@
         <p>@email._2</p>
         <p>@loanOffer.businessName</p>
         <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.loanValue)</p>
-        <p>@java.text.NumberFormat.getPercentInstance.format(loanOffer.offerAPR * 100)</p>
+        <p>@java.text.NumberFormat.getPercentInstance.format(loanOffer.offerAPR)</p>
         <p>@loanOffer.term Months</p>
         <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.getPmt)</p>
         <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalToPay)</p>
         <p>@java.text.NumberFormat.getCurrencyInstance.format(loanOffer.totalInterestToPay)</p>
-
 
                 <br>
                 <a href="@controllers.routes.Mailer.sendOfferAccept(email._1,email._2)">
@@ -38,10 +36,5 @@
                 </a>
             </div>
         </div>
-
-
-
-
     </div>
-
 }

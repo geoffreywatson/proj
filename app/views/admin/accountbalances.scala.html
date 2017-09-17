@@ -1,6 +1,5 @@
 @(accounts:Seq[(Int,Option[BigDecimal])])(implicit flash: Flash, messages: Messages)
 
-
 @admin.admintemplate("Account balances"){
 
     <div class="container">
@@ -30,14 +29,11 @@
                 <th>TOTAL</th>
                 <th>@java.text.NumberFormat.getCurrencyInstance.format(accounts.map(_._2).flatten.filter
                         (_>BigDecimal(0)).fold(BigDecimal(0))(_+_))
-
                 </th>
                 <th>@java.text.NumberFormat.getCurrencyInstance.format(accounts.map(_._2).flatten.filter
                         (_<BigDecimal(0)).fold(BigDecimal(0))(_+_) * -1)
-
                 </th>
             </tr>
         </table>
     </div>
-
 }

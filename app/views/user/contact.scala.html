@@ -3,8 +3,6 @@
 @import views.fieldConstructors.BSHelpers._
 @import play.api.i18n._
 
-
-
 @user.usertemplate("contact form"){
 
     <div class="container-fluid">
@@ -19,7 +17,7 @@
                 args = '_label -> "Last Name", 'placeholder -> "Last Name",
                 '_showConstraints -> false)
             @inputText(userDetailsForm("dob"),
-                args = '_label -> "DOB", 'placeholder -> "DOB", '_showConstraints->false)
+                args = '_label -> "DOB", 'placeholder -> "yyyy-MM-dd", '_showConstraints->false)
             @inputText(userDetailsForm("nin"),
                 args = '_label -> "National Ins No", 'placeholder -> "National Ins No", '_showConstraints->false)
 
@@ -29,6 +27,5 @@
                 </div>
             </div>
         }
-
     </div>
 }

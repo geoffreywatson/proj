@@ -8,17 +8,6 @@ import java.time.LocalDate
   */
 
 
-// The Ledger consists of DEBITS and CREDITS
-
-sealed trait Ledger{
-  def amount:BigDecimal
-}
-
-// Enter only non-negative amounts
-
-case class DEBIT(amount:BigDecimal) extends Ledger {require(amount >= 0)}
-case class CREDIT(amount:BigDecimal) extends Ledger {require(amount >= 0)}
-
 
 
 
@@ -32,10 +21,9 @@ case class JournalEntry(id:Long,created:Timestamp,entryDate:java.sql.Date)
 
 //A journalLine includes a monetary value as either a DEBIT or a CREDIT
 
-case class JournalLine(id:Long,jeId:Long,accId:Int,amount:BigDecimal, memo:Option[String],laId:Option[Long])
+case class JournalLine(id:Long,jeId:Long,accId:Int,amount:BigDecimal,memo:Option[String],laId:Option[Long])
 
 //case class JLine(jeId:Long,accId:Int,txn:Ledger,memo:Option[String],laId:Option[Long])
-
 
 // A journal entry is made up of JournalLines
 
