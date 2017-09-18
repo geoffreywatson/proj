@@ -41,7 +41,7 @@ class ApplicationTimer @Inject() (clock: Clock, appLifecycle: ApplicationLifecyc
   Thread.sleep(5000)
   ledgerDAO.get().interestonFakeData
 
-// wipe the db on shutdown
+// wipe the db on shutdown.
   def wipeDb = {
     ledgerDAO.get().delete
     loanApplicationDAO.get().delete

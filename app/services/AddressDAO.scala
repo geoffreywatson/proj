@@ -142,9 +142,6 @@ class AddressDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider, userDAO:
 
     }}
   }
-
-
-
     private def loadAddresses():Unit = {
       val source = Source.fromFile("./public/sampledata/addressdata.csv")
       val addressList = new ListBuffer[Address]()

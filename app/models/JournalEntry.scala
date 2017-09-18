@@ -7,10 +7,6 @@ import java.time.LocalDate
   * Created by geoffreywatson on 01/02/2017.
   */
 
-
-
-
-
 // An account must have a number, a name and be assigned to an account group.
 
 case class Account(id:Int,name:String,accountGroup:String){
@@ -26,12 +22,9 @@ case class JournalLine(id:Long,jeId:Long,accId:Int,amount:BigDecimal,memo:Option
 //case class JLine(jeId:Long,accId:Int,txn:Ledger,memo:Option[String],laId:Option[Long])
 
 // A journal entry is made up of JournalLines
-
 case class CompleteJournalEntry(entryDate:LocalDate,journalEntryLines:List[JournalLine]) {
-
   // validate the journal entry: the sum of the amount field in JournalLine must be 0. This is like sum of Debits is equal
   // to sum of Credits for a double-entry ledger system.
-
   def validateJE(jLines: List[JournalLine]): Boolean = {
     def validJE(lines: List[JournalLine], sum: BigDecimal): Boolean = lines match {
       case Nil => sum == BigDecimal(0)

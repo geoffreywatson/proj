@@ -1,7 +1,5 @@
 # --- !Ups
 
-
-
 insert into ACCOUNT (ID,NAME,AC_GROUP) VALUES (1050,"CASH LOAN DISBURSEMENT","ASSET"),
   (1010,"CASH OPERATING","ASSET"),
   (1060,"CASH COLLECTIONS","ASSET"),
@@ -13,12 +11,6 @@ insert into JOURNAL_ENTRY (CREATED, ENTRY_DATE) VALUES (NOW(),'2017-07-14');
 insert into JOURNAL_LINE (JE_ID,A_ID,AMOUNT,MEMO) VALUES (1,1010,500000.00,"Initial capital funding"),
   (1,7000,-500000.00,"Smith Round A"), (1,1050,1000000.00,"Loan capital drawdown 1 Barclays"),
   (1,6000,-1000000.00,"Barclays drawdown 1");
-
-
-
-
-
-
 
 
 # --- !Downs

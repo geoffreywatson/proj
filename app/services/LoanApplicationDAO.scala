@@ -225,7 +225,7 @@ class LoanApplicationDAO @Inject()(val dbConfigProvider:DatabaseConfigProvider,
                 Some(new Timestamp(sdf.parse(cols(10)).getTime()))
               } else None)
             loanApplicationList += application
-            Logger.debug(s"length of list buffer ${loanApplicationList.length}")
+            //Logger.debug(s"length of list buffer ${loanApplicationList.length}")
           }
           source.close()
           db.run((loanApplications ++= loanApplicationList).transactionally)
